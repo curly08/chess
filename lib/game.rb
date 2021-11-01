@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative '../lib/player'
+
 # core game logic
 class Game
   def play_game
@@ -13,5 +15,13 @@ class Game
 
       players.rotate!
     end
+  end
+
+  def establish_players
+    puts 'Player 1, what is your name?'
+    player_one = Player.new(gets.chomp)
+    puts 'Player 2, what is your name?'
+    player_two = Player.new(gets.chomp)
+    @players = [player_one, player_two]
   end
 end
