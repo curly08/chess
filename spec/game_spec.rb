@@ -22,4 +22,19 @@ describe Game do
       game.establish_players
     end
   end
+
+  describe '#randomize_colors' do
+    let(:player_one) { instance_double(Player, 'Matt') }
+    let(:player_two) { instance_double(Player, 'Gary') }
+
+    before do
+      game.instance_variable_set(:@players, [player_one, player_two])
+    end
+
+    it 'calls color on both Player instances' do
+      expect(player_one).to receive(:color=).once
+      expect(player_two).to receive(:color=).once
+      game.randomize_colors
+    end
+  end
 end
