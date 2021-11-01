@@ -4,6 +4,12 @@ require_relative '../lib/player'
 
 # core game logic
 class Game
+  attr_accessor :players
+
+  def initialize
+    @players = Array.new(2)
+  end
+
   def play_game
     establish_players
     randomize_colors
@@ -22,6 +28,12 @@ class Game
     player_one = Player.new(gets.chomp)
     puts 'Player 2, what is your name?'
     player_two = Player.new(gets.chomp)
-    @players = [player_one, player_two]
+    players.push(player_one, player_two)
+  end
+
+  def randomize_colors
+    players.shuffle!
+    players[0].color = 'white'
+    players[1].color = 'black'
   end
 end
