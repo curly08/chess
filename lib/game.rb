@@ -1,22 +1,25 @@
 # frozen_string_literal: true
 
+require 'pry-byebug'
+
 require_relative '../lib/player'
 require_relative '../lib/board'
 require_relative '../lib/pieces'
+require_relative '../lib/space'
 
 # core game logic
 class Game
   attr_accessor :players, :board
 
   def initialize
-    @players = Array.new(2)
+    @players = []
     @board = Board.new
   end
 
   def play_game
     establish_players
     randomize_colors
-    generate_pieces
+    players.each { |player| generate_pieces(player) }
     loop do
       players[0].play_move
       return game_over_message if game_over == true
@@ -39,21 +42,26 @@ class Game
     players[1].color = 'black'
   end
 
-  def generate_pieces
-    generate_pawns
-    generate_rooks
-    generate_knights
-    generate_bishops
-    generate_queens
-    generate_kings
+  def generate_pieces(player)
+    generate_pawns(player)
   end
 
-  def generate_pawns
-    Pawn.white_starting_locations.each do |location|
-      player[0].pieces << Pawn.new(player.color, location)
-    end
-    Pawn.black_starting_locations.each do |location|
-      player[1].pieces << Pawn.new(player.color, location)
+  def generate_pawns(player)
+    starting_locations = player.color == 'white' ? Pawn.white_starting_locations : Pawn.black_starting_locations
+    starting_locations.each do |location|
+      new_pawn = Pawn.new(player.color, location)
+      populate_square(new_pawn, location)
+      player.pieces << new_pawn
     end
   end
+
+  def populate_square(new_piece, piece_location)
+    square = board.spaces.select { |space| space.location == piece_location }.pop
+    square.piece = new_piece
+    square.data = new_piece.symbol
+  end
 end
+
+# game = Game.new
+# binding.pry
+# game.play_game
