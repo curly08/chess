@@ -37,4 +37,18 @@ describe Game do
       game.randomize_colors
     end
   end
+
+  describe '#generate_pawns' do
+    let(:player_one) { instance_double(Player, name: 'Matt', color: 'white', pieces: []) }
+    let(:player_two) { instance_double(Player, name: 'Gary', color: 'black', pieces: []) }
+
+    before do
+      game.instance_variable_set(:@players, [player_one, player_two])
+    end
+
+    it 'generates 8 pawns for both players' do
+      expect { game.generate_pawns(player_one) }.to change { player_one.pieces.select { |piece| piece.is_a? Pawn }.size }.from(0).to(8)
+      expect { game.generate_pawns(player_two) }.to change { player_two.pieces.select { |piece| piece.is_a? Pawn }.size }.from(0).to(8)
+    end
+  end
 end
