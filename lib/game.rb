@@ -5,7 +5,7 @@ require 'pry-byebug'
 require_relative '../lib/player'
 require_relative '../lib/board'
 require_relative '../lib/pieces'
-require_relative '../lib/space'
+require_relative '../lib/square'
 
 # core game logic
 class Game
@@ -56,9 +56,9 @@ class Game
   end
 
   def populate_square(new_piece, piece_location)
-    square = board.spaces.select { |space| space.location == piece_location }.pop
-    square.piece = new_piece
-    square.data = new_piece.symbol
+    selected_square = board.squares.select { |square| square.location == piece_location }.pop
+    selected_square.piece = new_piece
+    selected_square.data = new_piece.symbol
   end
 end
 
