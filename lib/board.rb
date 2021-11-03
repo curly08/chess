@@ -36,4 +36,17 @@ class Board
     end
     puts rank_row
   end
+
+  def populate_square(piece, piece_location)
+    selected_square = squares.select { |square| square.location == piece_location }.pop
+    selected_square.piece = piece
+    selected_square.data = piece.symbol
+    piece.location = piece_location
+  end
+
+  def clear_square(location)
+    selected_square = squares.select { |square| square.location == location }.pop
+    selected_square.piece = nil
+    selected_square.data = ' '
+  end
 end
