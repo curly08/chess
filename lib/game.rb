@@ -10,16 +10,21 @@ require_relative '../lib/square'
 # core game logic
 class Game
   attr_accessor :players, :board
+  attr_reader :pieces
 
   def initialize
     @players = []
     @board = Board.new
+    @pieces = [Pawn, Rook, Knight, Bishop, Queen, King]
   end
 
   def play_game
     establish_players
     randomize_colors
-    players.each { |player| generate_pieces(player) }
+    players.each do |player|
+      pieces.each { |piece_type| generate_pieces(player, piece_type) }
+    end
+    board.make_grid
     # loop do
     #   players[0].play_move
     #   return game_over_message if game_over == true
@@ -42,26 +47,12 @@ class Game
     players[1].color = 'black'
   end
 
-  def generate_pieces(player)
-    generate_pawns(player)
-    generate_rooks(player)
-  end
-
-  def generate_pawns(player)
-    starting_locations = player.color == 'white' ? Pawn.white_starting_locations : Pawn.black_starting_locations
+  def generate_pieces(player, piece_class)
+    starting_locations = player.color == 'white' ? piece_class.white_starting_locations : piece_class.black_starting_locations
     starting_locations.each do |location|
-      new_pawn = Pawn.new(player.color, location)
-      populate_square(new_pawn, location)
-      player.pieces << new_pawn
-    end
-  end
-
-  def generate_rooks(player)
-    starting_locations = player.color == 'white' ? Rook.white_starting_locations : Rook.black_starting_locations
-    starting_locations.each do |location|
-      new_rook = Rook.new(player.color, location)
-      populate_square(new_rook, location)
-      player.pieces << new_rook
+      new_piece = piece_class.new(player.color, location)
+      populate_square(new_piece, location)
+      player.pieces << new_piece
     end
   end
 
@@ -72,7 +63,6 @@ class Game
   end
 end
 
-# game = Game.new
-# # binding.pry
-# game.play_game
-# game.board.make_grid
+game = Game.new
+# binding.pry
+game.play_game
