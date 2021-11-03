@@ -19,3 +19,23 @@ class Pawn
     attr_reader :white_starting_locations, :black_starting_locations
   end
 end
+
+# Rook class
+class Rook
+  attr_accessor :location
+  attr_reader :color, :symbol
+
+  @white_starting_locations = %w[a1 h1]
+  @black_starting_locations = %w[a8 h8]
+
+  def initialize(color, location)
+    @symbol = 'R'
+    @color = color
+    @location = location
+    @legal_moves = []
+  end
+
+  class << self
+    attr_reader :white_starting_locations, :black_starting_locations
+  end
+end
