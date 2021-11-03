@@ -24,7 +24,7 @@ class Game
     players.each do |player|
       pieces.each { |piece_type| generate_pieces(player, piece_type) }
     end
-    board.make_grid
+    show_board
     # loop do
     #   players[0].play_move
     #   return game_over_message if game_over == true
@@ -60,6 +60,12 @@ class Game
     selected_square = board.squares.select { |square| square.location == piece_location }.pop
     selected_square.piece = new_piece
     selected_square.data = new_piece.symbol
+  end
+
+  def show_board
+    system('clear') || system('cls')
+    puts "#{players[0].name.upcase}(#{players[0].color})    V    #{players[1].name.upcase}(#{players[1].color})\n"
+    board.make_grid
   end
 end
 
