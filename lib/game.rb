@@ -20,12 +20,12 @@ class Game
     establish_players
     randomize_colors
     players.each { |player| generate_pieces(player) }
-    loop do
-      players[0].play_move
-      return game_over_message if game_over == true
+    # loop do
+    #   players[0].play_move
+    #   return game_over_message if game_over == true
 
-      players.rotate!
-    end
+    #   players.rotate!
+    # end
   end
 
   def establish_players
@@ -44,6 +44,7 @@ class Game
 
   def generate_pieces(player)
     generate_pawns(player)
+    generate_rooks(player)
   end
 
   def generate_pawns(player)
@@ -55,6 +56,15 @@ class Game
     end
   end
 
+  def generate_rooks(player)
+    starting_locations = player.color == 'white' ? Rook.white_starting_locations : Rook.black_starting_locations
+    starting_locations.each do |location|
+      new_rook = Rook.new(player.color, location)
+      populate_square(new_rook, location)
+      player.pieces << new_rook
+    end
+  end
+
   def populate_square(new_piece, piece_location)
     selected_square = board.squares.select { |square| square.location == piece_location }.pop
     selected_square.piece = new_piece
@@ -63,5 +73,6 @@ class Game
 end
 
 # game = Game.new
-# binding.pry
+# # binding.pry
 # game.play_game
+# game.board.make_grid
