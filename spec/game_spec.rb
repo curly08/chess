@@ -38,7 +38,7 @@ describe Game do
     end
   end
 
-  describe '#generate_pawns' do
+  describe '#generate_pieces' do
     let(:player_one) { instance_double(Player, name: 'Matt', color: 'white', pieces: []) }
     let(:player_two) { instance_double(Player, name: 'Gary', color: 'black', pieces: []) }
 
@@ -47,8 +47,33 @@ describe Game do
     end
 
     it 'generates 8 pawns for both players' do
-      expect { game.generate_pawns(player_one) }.to change { player_one.pieces.select { |piece| piece.is_a? Pawn }.size }.from(0).to(8)
-      expect { game.generate_pawns(player_two) }.to change { player_two.pieces.select { |piece| piece.is_a? Pawn }.size }.from(0).to(8)
+      expect { game.generate_pieces(player_one, Pawn) }.to change { player_one.pieces.select { |piece| piece.is_a? Pawn }.size }.from(0).to(8)
+      expect { game.generate_pieces(player_two, Pawn) }.to change { player_two.pieces.select { |piece| piece.is_a? Pawn }.size }.from(0).to(8)
+    end
+
+    it 'generates 2 rooks for both players' do
+      expect { game.generate_pieces(player_one, Rook) }.to change { player_one.pieces.select { |piece| piece.is_a? Rook }.size }.from(0).to(2)
+      expect { game.generate_pieces(player_two, Rook) }.to change { player_two.pieces.select { |piece| piece.is_a? Rook }.size }.from(0).to(2)
+    end
+
+    it 'generates 2 knights for both players' do
+      expect { game.generate_pieces(player_one, Knight) }.to change { player_one.pieces.select { |piece| piece.is_a? Knight }.size }.from(0).to(2)
+      expect { game.generate_pieces(player_two, Knight) }.to change { player_two.pieces.select { |piece| piece.is_a? Knight }.size }.from(0).to(2)
+    end
+
+    it 'generates 2 bishops for both players' do
+      expect { game.generate_pieces(player_one, Bishop) }.to change { player_one.pieces.select { |piece| piece.is_a? Bishop }.size }.from(0).to(2)
+      expect { game.generate_pieces(player_two, Bishop) }.to change { player_two.pieces.select { |piece| piece.is_a? Bishop }.size }.from(0).to(2)
+    end
+
+    it 'generates 1 queen for both players' do
+      expect { game.generate_pieces(player_one, Queen) }.to change { player_one.pieces.select { |piece| piece.is_a? Queen }.size }.from(0).to(1)
+      expect { game.generate_pieces(player_two, Queen) }.to change { player_two.pieces.select { |piece| piece.is_a? Queen }.size }.from(0).to(1)
+    end
+
+    it 'generates 1 king for both players' do
+      expect { game.generate_pieces(player_one, King) }.to change { player_one.pieces.select { |piece| piece.is_a? King }.size }.from(0).to(1)
+      expect { game.generate_pieces(player_two, King) }.to change { player_two.pieces.select { |piece| piece.is_a? King }.size }.from(0).to(1)
     end
   end
 end
