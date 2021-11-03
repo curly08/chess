@@ -50,3 +50,39 @@ class Knight < Piece
     @legal_moves = []
   end
 end
+
+# Bishop class
+class Bishop < Piece
+  @white_starting_locations = %w[c1 f1]
+  @black_starting_locations = %w[c8 f8]
+
+  def initialize(color, location)
+    super
+    @symbol = color == 'white' ? "\u2657".encode('utf-8') : "\u265D".encode('utf-8')
+    @legal_moves = []
+  end
+end
+
+# Queen class
+class Queen < Piece
+  @white_starting_locations = %w[d1]
+  @black_starting_locations = %w[d8]
+
+  def initialize(color, location)
+    super
+    @symbol = color == 'white' ? "\u2655".encode('utf-8') : "\u265B".encode('utf-8')
+    @legal_moves = []
+  end
+end
+
+# King class
+class King < Piece
+  @white_starting_locations = %w[e1]
+  @black_starting_locations = %w[e8]
+
+  def initialize(color, location)
+    super
+    @symbol = color == 'white' ? "\u2654".encode('utf-8') : "\u265A".encode('utf-8')
+    @legal_moves = []
+  end
+end
