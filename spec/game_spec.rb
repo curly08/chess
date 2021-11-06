@@ -3,6 +3,9 @@
 # rubocop:disable all
 
 require_relative '../lib/game'
+require_relative '../lib/board'
+require_relative '../lib/pieces'
+require_relative '../lib/square'
 
 describe Game do
   subject(:game) { described_class.new }
@@ -47,33 +50,65 @@ describe Game do
     end
 
     it 'generates 8 pawns for both players' do
-      expect { game.generate_pieces(player_one, Pawn) }.to change { player_one.pieces.select { |piece| piece.is_a? Pawn }.size }.from(0).to(8)
-      expect { game.generate_pieces(player_two, Pawn) }.to change { player_two.pieces.select { |piece| piece.is_a? Pawn }.size }.from(0).to(8)
+      expect { game.generate_pieces(player_one, WhitePawn) }.to change { player_one.pieces.select { |piece| piece.is_a? WhitePawn }.size }.from(0).to(8)
+      expect { game.generate_pieces(player_two, BlackPawn) }.to change { player_two.pieces.select { |piece| piece.is_a? BlackPawn }.size }.from(0).to(8)
     end
 
     it 'generates 2 rooks for both players' do
-      expect { game.generate_pieces(player_one, Rook) }.to change { player_one.pieces.select { |piece| piece.is_a? Rook }.size }.from(0).to(2)
-      expect { game.generate_pieces(player_two, Rook) }.to change { player_two.pieces.select { |piece| piece.is_a? Rook }.size }.from(0).to(2)
+      expect { game.generate_pieces(player_one, WhiteRook) }.to change { player_one.pieces.select { |piece| piece.is_a? WhiteRook }.size }.from(0).to(2)
+      expect { game.generate_pieces(player_two, BlackRook) }.to change { player_two.pieces.select { |piece| piece.is_a? BlackRook }.size }.from(0).to(2)
     end
 
     it 'generates 2 knights for both players' do
-      expect { game.generate_pieces(player_one, Knight) }.to change { player_one.pieces.select { |piece| piece.is_a? Knight }.size }.from(0).to(2)
-      expect { game.generate_pieces(player_two, Knight) }.to change { player_two.pieces.select { |piece| piece.is_a? Knight }.size }.from(0).to(2)
+      expect { game.generate_pieces(player_one, WhiteKnight) }.to change { player_one.pieces.select { |piece| piece.is_a? WhiteKnight }.size }.from(0).to(2)
+      expect { game.generate_pieces(player_two, BlackKnight) }.to change { player_two.pieces.select { |piece| piece.is_a? BlackKnight }.size }.from(0).to(2)
     end
 
     it 'generates 2 bishops for both players' do
-      expect { game.generate_pieces(player_one, Bishop) }.to change { player_one.pieces.select { |piece| piece.is_a? Bishop }.size }.from(0).to(2)
-      expect { game.generate_pieces(player_two, Bishop) }.to change { player_two.pieces.select { |piece| piece.is_a? Bishop }.size }.from(0).to(2)
+      expect { game.generate_pieces(player_one, WhiteBishop) }.to change { player_one.pieces.select { |piece| piece.is_a? WhiteBishop }.size }.from(0).to(2)
+      expect { game.generate_pieces(player_two, BlackBishop) }.to change { player_two.pieces.select { |piece| piece.is_a? BlackBishop }.size }.from(0).to(2)
     end
 
     it 'generates 1 queen for both players' do
-      expect { game.generate_pieces(player_one, Queen) }.to change { player_one.pieces.select { |piece| piece.is_a? Queen }.size }.from(0).to(1)
-      expect { game.generate_pieces(player_two, Queen) }.to change { player_two.pieces.select { |piece| piece.is_a? Queen }.size }.from(0).to(1)
+      expect { game.generate_pieces(player_one, WhiteQueen) }.to change { player_one.pieces.select { |piece| piece.is_a? WhiteQueen }.size }.from(0).to(1)
+      expect { game.generate_pieces(player_two, BlackQueen) }.to change { player_two.pieces.select { |piece| piece.is_a? BlackQueen }.size }.from(0).to(1)
     end
 
     it 'generates 1 king for both players' do
-      expect { game.generate_pieces(player_one, King) }.to change { player_one.pieces.select { |piece| piece.is_a? King }.size }.from(0).to(1)
-      expect { game.generate_pieces(player_two, King) }.to change { player_two.pieces.select { |piece| piece.is_a? King }.size }.from(0).to(1)
+      expect { game.generate_pieces(player_one, WhiteKing) }.to change { player_one.pieces.select { |piece| piece.is_a? WhiteKing }.size }.from(0).to(1)
+      expect { game.generate_pieces(player_two, BlackKing) }.to change { player_two.pieces.select { |piece| piece.is_a? BlackKing }.size }.from(0).to(1)
+    end
+  end
+end
+
+describe WhitePawn do
+  subject(:pawn) { described_class.new('e2') }
+  let(:board) { Board.new }
+
+  describe '#legal_moves' do
+    context 'when pawn location is on start location e2 and no captures are available' do
+      it 'creates [e3, e4]' do
+        expect(pawn.legal_moves(board)).to eq(['e3', 'e4'])
+      end
+    end
+
+    context 'when pawn location is on start location e2 and with two captures available' do
+      before do
+        board.populate_square(BlackPawn.new('d3'), 'd3')
+        board.populate_square(BlackPawn.new('f3'), 'f3')
+      end
+      
+      it 'creates [e3, e4, d3, f3]' do
+        expect(pawn.legal_moves(board)).to eq(['e3', 'e4', 'd3', 'f3'])
+      end
+    end
+
+    context 'when pawn location is not on start location and no captures are available' do
+      subject(:pawn) { described_class.new('e3') }
+
+      it 'creates [e4]' do
+        expect(pawn.legal_moves(board)).to eq(['e4'])
+      end
     end
   end
 end
