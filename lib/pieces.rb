@@ -40,17 +40,18 @@ class WhitePawn < WhitePiece
   end
 
   def legal_moves(board)
-    rank = location.split(//)[0].ord
-    file = location.split(//)[1].to_i
-    starting_locations = WhitePawn.starting_locations
+    file = location.split(//)[0].ord
+    rank = location.split(//)[1].to_i
     moveset = []
-    moveset << [rank.chr, file + 1].join
-    moveset << [rank.chr, file + 2].join if starting_locations.include?(location)
-    capture_left = [(rank - 1).chr, file + 1].join
+    up_one = [file.chr, rank + 1].join
+    up_two = [file.chr, rank + 2].join
+    capture_left = [(file - 1).chr, rank + 1].join
     capture_left_square = board.squares.select { |square| square.location == capture_left }.pop
-    moveset << capture_left if !capture_left_square.piece.nil? && capture_left_square.piece.color == 'black'
-    capture_right = [(rank + 1).chr, file + 1].join
+    capture_right = [(file + 1).chr, rank + 1].join
     capture_right_square = board.squares.select { |square| square.location == capture_right }.pop
+    moveset << up_one if board.squares.select { |square| square.location == up_one }.pop.piece.nil?
+    moveset << up_two if WhitePawn.starting_locations.include?(location)
+    moveset << capture_left if !capture_left_square.piece.nil? && capture_left_square.piece.color == 'black'
     moveset << capture_right if !capture_right_square.piece.nil? && capture_right_square.piece.color == 'black'
     moveset
   end
@@ -66,17 +67,19 @@ class BlackPawn < BlackPiece
   end
 
   def legal_moves(board)
-    rank = location.split(//)[0].ord
-    file = location.split(//)[1].to_i
+    file = location.split(//)[0].ord
+    rank = location.split(//)[1].to_i
     moveset = []
-    moveset << [rank.chr, file + 1].join
-    moveset << [rank.chr, file + 2].join if BlackPawn.starting_locations.include?(location)
-    capture_left = [(rank - 1).chr, file + 1].join
+    down_one = [file.chr, rank - 1].join
+    down_two = [file.chr, rank - 2].join
+    capture_left = [(file - 1).chr, rank - 1].join
     capture_left_square = board.squares.select { |square| square.location == capture_left }.pop
-    moveset << capture_left if !capture_left_square.piece.nil? && capture_left_square.piece.color == 'black'
-    capture_right = [(rank + 1).chr, file + 1].join
+    capture_right = [(file + 1).chr, rank - 1].join
     capture_right_square = board.squares.select { |square| square.location == capture_right }.pop
-    moveset << capture_right if !capture_right_square.piece.nil? && capture_right_square.piece.color == 'black'
+    moveset << down_one if board.squares.select { |square| square.location == down_one }.pop.piece.nil?
+    moveset << down_two if BlackPawn.starting_locations.include?(location)
+    moveset << capture_left if !capture_left_square.piece.nil? && capture_left_square.piece.color == 'white'
+    moveset << capture_right if !capture_right_square.piece.nil? && capture_right_square.piece.color == 'white'
     moveset
   end
 end
