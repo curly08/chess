@@ -110,6 +110,18 @@ describe WhitePawn do
         expect(pawn.legal_moves(board)).to eq(['e4'])
       end
     end
+
+    context 'when pawn is blocked and no captures are available' do
+      subject(:pawn) { described_class.new('e3') }
+
+      before do
+        board.populate_square(BlackPawn.new('e4'), 'e4')
+      end
+
+      it 'creates []' do
+        expect(pawn.legal_moves(board)).to eq([])
+      end
+    end
   end
 end
 
@@ -141,6 +153,74 @@ describe BlackPawn do
       it 'creates [e5]' do
         expect(pawn.legal_moves(board)).to eq(['e5'])
       end
+    end
+
+    context 'when pawn is blocked and no captures are available' do
+      subject(:pawn) { described_class.new('e6') }
+
+      before do
+        board.populate_square(WhitePawn.new('e5'), 'e5')
+      end
+
+      it 'creates []' do
+        expect(pawn.legal_moves(board)).to eq([])
+      end
+    end
+  end
+end
+
+describe WhiteRook do
+  subject(:rook) { described_class.new('a1') }
+  let(:board) { Board.new }
+
+  context 'when the rook is on a1 and the file is open but the rank is closed' do
+    before do
+      board.populate_square(WhitePawn.new('b1'), 'b1')
+    end
+
+    it 'creates [a2 a3 a4 a5 a6 a7 a8]' do
+      expect(rook.legal_moves(board)).to eq(%w[a2 a3 a4 a5 a6 a7 a8])
+    end
+  end
+
+  context 'when the rook is on a1 and the rank is open but the file is closed' do
+    before do
+      board.populate_square(WhitePawn.new('a2'), 'a2')
+    end
+
+    it 'creates [b1 c1 d1 e1 f1 g1 h1]' do
+      expect(rook.legal_moves(board)).to eq(%w[b1 c1 d1 e1 f1 g1 h1])
+    end
+  end
+
+  context 'when the rook is on a4 and the file is open' do
+    subject(:rook) { described_class.new('a4') }
+
+    it 'includes [a1 a2 a3 a5 a6 a7 a8]' do
+      expect(rook.legal_moves(board)).to include('a1', 'a2', 'a3', 'a5', 'a6', 'a7', 'a8')
+    end
+  end
+
+  context 'when the rook is on a4 and the rank is open' do
+    subject(:rook) { described_class.new('d1') }
+
+    it 'includes [a1 b1 c1 e1 f1 g1 h1]' do
+      expect(rook.legal_moves(board)).to include('a1', 'b1', 'c1', 'e1', 'f1', 'g1', 'h1')
+    end
+  end
+
+  context 'when the rook is on c4 and is surrounded by friendly and enemy pieces' do
+    subject(:rook) { described_class.new('c4') }
+
+    before do
+      board.populate_square(BlackPawn.new('c6'), 'c6')
+      board.populate_square(WhitePawn.new('f4'), 'f4')
+      board.populate_square(WhitePawn.new('c1'), 'c1')
+      board.populate_square(BlackPawn.new('a4'), 'a4')
+    end
+
+    it 'includes [c5 c6 d4 e4 c3 c2 b4 a4]' do
+      expect(rook.legal_moves(board)).to include('c5', 'c6', 'd4', 'e4', 'c3', 'c2', 'b4', 'a4')
     end
   end
 end
