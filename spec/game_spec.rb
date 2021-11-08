@@ -112,3 +112,35 @@ describe WhitePawn do
     end
   end
 end
+
+describe BlackPawn do
+  subject(:pawn) { described_class.new('e7') }
+  let(:board) { Board.new }
+
+  describe '#legal_moves' do
+    context 'when pawn location is on start location e7 and no captures are available' do
+      it 'creates [e6, e5]' do
+        expect(pawn.legal_moves(board)).to eq(['e6', 'e5'])
+      end
+    end
+
+    context 'when pawn location is on start location e2 and with two captures available' do
+      before do
+        board.populate_square(WhitePawn.new('d6'), 'd6')
+        board.populate_square(WhitePawn.new('f6'), 'f6')
+      end
+      
+      it 'creates [e6, e5, d6, f6]' do
+        expect(pawn.legal_moves(board)).to eq(%w[e6 e5 d6 f6])
+      end
+    end
+
+    context 'when pawn location is not on start location and no captures are available' do
+      subject(:pawn) { described_class.new('e6') }
+
+      it 'creates [e5]' do
+        expect(pawn.legal_moves(board)).to eq(['e5'])
+      end
+    end
+  end
+end
