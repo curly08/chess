@@ -380,3 +380,53 @@ describe BlackKnight do
     end
   end
 end
+
+describe WhiteBishop do
+  subject(:bishop) { described_class.new('a1') }
+  let(:board) { Board.new }
+
+  context 'when bishop is on a1 and the diagonal is open' do
+    it 'includes [b2 c3 d4 e5 f6 g7 h8]' do
+      expect(bishop.legal_moves(board)).to eq(%w[b2 c3 d4 e5 f6 g7 h8])
+    end
+  end
+
+  context 'when bishop is on h1 and the diagonal is open' do
+    subject(:bishop) { described_class.new('h1') }
+
+    it 'includes [g2 f3 e4 d5 c6 b7 a8]' do
+      expect(bishop.legal_moves(board)).to eq(%w[g2 f3 e4 d5 c6 b7 a8])
+    end
+  end
+
+  context 'when bishop is on a8 and the diagonal is open' do
+    subject(:bishop) { described_class.new('a8') }
+
+    it 'includes [b7 c6 d5 e4 f3 g2 h1]' do
+      expect(bishop.legal_moves(board)).to eq(%w[b7 c6 d5 e4 f3 g2 h1])
+    end
+  end
+
+  context 'when bishop is on h8 and the diagonal is open' do
+    subject(:bishop) { described_class.new('h8') }
+
+    it 'includes [g7 f6 e5 d4 c3 b2 a1]' do
+      expect(bishop.legal_moves(board)).to eq(%w[g7 f6 e5 d4 c3 b2 a1])
+    end
+  end
+
+  context 'when bishop is on d5 and is surrounded by friendly and enemy pieces' do
+    subject(:bishop) { described_class.new('d5') }
+
+    before do
+      board.populate_square(BlackPawn.new('f7'), 'f7')
+      board.populate_square(WhitePawn.new('f3'), 'f3')
+      board.populate_square(BlackPawn.new('a8'), 'a8')
+      board.populate_square(WhitePawn.new('b3'), 'b3')
+    end
+
+    it 'includes [e6 f7 e4 c6 b7 a8 c4]' do
+      expect(bishop.legal_moves(board)).to include('e6', 'f7', 'e4', 'c6', 'b7', 'a8', 'c4')
+    end
+  end
+end
