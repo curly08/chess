@@ -224,3 +224,67 @@ describe WhiteRook do
     end
   end
 end
+
+describe BlackRook do
+  subject(:rook) { described_class.new('a8') }
+  let(:board) { Board.new }
+
+  context 'when the rook is on a8 and the file is open but the rank is closed' do
+    before do
+      board.populate_square(BlackPawn.new('b8'), 'b8')
+    end
+
+    it 'includes [a1 a2 a3 a4 a5 a6 a7]' do
+      expect(rook.legal_moves(board)).to include('a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7')
+    end
+  end
+
+  context 'when the rook is on a1 and the rank is open but the file is closed' do
+    before do
+      board.populate_square(BlackPawn.new('a7'), 'a7')
+    end
+
+    it 'creates [b8 c8 d8 e8 f8 g8 h8]' do
+      expect(rook.legal_moves(board)).to include('b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8')
+    end
+  end
+
+  context 'when the rook is on a4 and the file is open' do
+    subject(:rook) { described_class.new('a4') }
+
+    before do
+      board.populate_square(BlackPawn.new('b4'), 'b4')
+    end
+
+    it 'includes [a1 a2 a3 a5 a6 a7 a8]' do
+      expect(rook.legal_moves(board)).to include('a1', 'a2', 'a3', 'a5', 'a6', 'a7', 'a8')
+    end
+  end
+
+  context 'when the rook is on a4 and the rank is open' do
+    subject(:rook) { described_class.new('d8') }
+
+    before do
+      board.populate_square(BlackPawn.new('d7'), 'd7')
+    end
+
+    it 'includes [a8 b8 c8 e8 f8 g8 h8]' do
+      expect(rook.legal_moves(board)).to include('a8', 'b8', 'c8', 'e8', 'f8', 'g8', 'h8')
+    end
+  end
+
+  context 'when the rook is on c4 and is surrounded by friendly and enemy pieces' do
+    subject(:rook) { described_class.new('c4') }
+
+    before do
+      board.populate_square(WhitePawn.new('c6'), 'c6')
+      board.populate_square(BlackPawn.new('f4'), 'f4')
+      board.populate_square(BlackPawn.new('c1'), 'c1')
+      board.populate_square(WhitePawn.new('a4'), 'a4')
+    end
+
+    it 'includes [c5 c6 d4 e4 c3 c2 b4 a4]' do
+      expect(rook.legal_moves(board)).to include('c5', 'c6', 'd4', 'e4', 'c3', 'c2', 'b4', 'a4')
+    end
+  end
+end
