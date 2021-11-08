@@ -288,3 +288,49 @@ describe BlackRook do
     end
   end
 end
+
+describe WhiteKnight do
+  subject(:knight) { described_class.new('c3') }
+  let(:board) { Board.new }
+
+  context 'when knight is on c3 and all moves are available' do
+    it 'includes [a2 b1 a4 b5 d1 e2 d5 e4]' do
+      expect(knight.legal_moves(board)).to include('a2', 'b1', 'a4', 'b5', 'd1', 'e2', 'd5', 'e4')
+    end
+  end
+
+  context 'when knight is on c3 and friendly pawns are on a2 and d5' do
+    before do
+      board.populate_square(WhitePawn.new('a2'), 'a2')
+      board.populate_square(WhitePawn.new('d5'), 'd5')
+    end
+
+    it 'includes [b1 a4 b5 d1 e2 e4]' do
+      expect(knight.legal_moves(board)).to include('b1', 'a4', 'b5', 'd1', 'e2', 'e4')
+    end
+  end
+
+  context 'when knight is on c3 and enemy pawns are on a2 and d5' do
+    before do
+      board.populate_square(BlackPawn.new('a2'), 'a2')
+      board.populate_square(BlackPawn.new('d5'), 'd5')
+    end
+
+    it 'includes [a2 b1 a4 b5 d1 e2 d5 e4]' do
+      expect(knight.legal_moves(board)).to include('a2', 'b1', 'a4', 'b5', 'd1', 'e2', 'd5', 'e4')
+    end
+  end
+
+  context 'when knight is on a1 and friendly pawns are on a2 and d5' do
+    subject(:knight) { described_class.new('a1') }
+
+    before do
+      board.populate_square(WhitePawn.new('c2'), 'c2')
+      board.populate_square(WhitePawn.new('b3'), 'b3')
+    end
+
+    it 'has no moves' do
+      expect(knight.legal_moves(board)).to eq([])
+    end
+  end
+end
