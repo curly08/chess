@@ -92,6 +92,45 @@ class WhiteRook < WhitePiece
     super
     @symbol = "\u2656".encode('utf-8')
   end
+
+  def legal_moves(board)
+    file = location.split(//)[0].ord
+    rank = location.split(//)[1].to_i
+    moveset = []
+    ((rank + 1)..8).each do |r|
+      location = [file.chr, r].join
+      space = board.squares.select { |square| square.location == location }.pop
+      break if !space.piece.nil? && space.piece.color == 'white'
+
+      moveset << location
+      break if !space.piece.nil? && space.piece.color == 'black'
+    end
+    (1..(rank - 1)).reverse_each do |r|
+      location = [file.chr, r].join
+      space = board.squares.select { |square| square.location == location }.pop
+      break if !space.piece.nil? && space.piece.color == 'white'
+
+      moveset << location
+      break if !space.piece.nil? && space.piece.color == 'black'
+    end
+    ((file + 1)..('h'.ord)).each do |f|
+      location = [f.chr, rank].join
+      space = board.squares.select { |square| square.location == location }.pop
+      break if !space.piece.nil? && space.piece.color == 'white'
+
+      moveset << location
+      break if !space.piece.nil? && space.piece.color == 'black'
+    end
+    (('a'.ord)..(file - 1)).reverse_each do |f|
+      location = [f.chr, rank].join
+      space = board.squares.select { |square| square.location == location }.pop
+      break if !space.piece.nil? && space.piece.color == 'white'
+
+      moveset << location
+      break if !space.piece.nil? && space.piece.color == 'black'
+    end
+    moveset
+  end
 end
 
 # Black Rook class
