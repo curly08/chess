@@ -97,6 +97,14 @@ class WhiteRook < WhitePiece
     file = location.split(//)[0].ord
     rank = location.split(//)[1].to_i
     moveset = []
+    moves_below_rank(board, file, rank, moveset)
+    moves_above_rank(board, file, rank, moveset)
+    moves_left_of_file(board, file, rank, moveset)
+    moves_right_of_file(board, file, rank, moveset)
+    moveset
+  end
+
+  def moves_above_rank(board, file, rank, moveset)
     ((rank + 1)..8).each do |r|
       location = [file.chr, r].join
       space = board.squares.select { |square| square.location == location }.pop
@@ -105,6 +113,9 @@ class WhiteRook < WhitePiece
       moveset << location
       break if !space.piece.nil? && space.piece.color == 'black'
     end
+  end
+
+  def moves_below_rank(board, file, rank, moveset)
     (1..(rank - 1)).reverse_each do |r|
       location = [file.chr, r].join
       space = board.squares.select { |square| square.location == location }.pop
@@ -113,6 +124,9 @@ class WhiteRook < WhitePiece
       moveset << location
       break if !space.piece.nil? && space.piece.color == 'black'
     end
+  end
+
+  def moves_right_of_file(board, file, rank, moveset)
     ((file + 1)..('h'.ord)).each do |f|
       location = [f.chr, rank].join
       space = board.squares.select { |square| square.location == location }.pop
@@ -121,6 +135,9 @@ class WhiteRook < WhitePiece
       moveset << location
       break if !space.piece.nil? && space.piece.color == 'black'
     end
+  end
+
+  def moves_left_of_file(board, file, rank, moveset)
     (('a'.ord)..(file - 1)).reverse_each do |f|
       location = [f.chr, rank].join
       space = board.squares.select { |square| square.location == location }.pop
@@ -129,7 +146,6 @@ class WhiteRook < WhitePiece
       moveset << location
       break if !space.piece.nil? && space.piece.color == 'black'
     end
-    moveset
   end
 end
 
@@ -140,6 +156,61 @@ class BlackRook < BlackPiece
   def initialize(location)
     super
     @symbol = "\u265C".encode('utf-8')
+  end
+
+  def legal_moves(board)
+    file = location.split(//)[0].ord
+    rank = location.split(//)[1].to_i
+    moveset = []
+    moves_below_rank(board, file, rank, moveset)
+    moves_above_rank(board, file, rank, moveset)
+    moves_left_of_file(board, file, rank, moveset)
+    moves_right_of_file(board, file, rank, moveset)
+    moveset
+  end
+
+  def moves_above_rank(board, file, rank, moveset)
+    ((rank + 1)..8).each do |r|
+      location = [file.chr, r].join
+      space = board.squares.select { |square| square.location == location }.pop
+      break if !space.piece.nil? && space.piece.color == 'black'
+
+      moveset << location
+      break if !space.piece.nil? && space.piece.color == 'white'
+    end
+  end
+
+  def moves_below_rank(board, file, rank, moveset)
+    (1..(rank - 1)).reverse_each do |r|
+      location = [file.chr, r].join
+      space = board.squares.select { |square| square.location == location }.pop
+      break if !space.piece.nil? && space.piece.color == 'black'
+
+      moveset << location
+      break if !space.piece.nil? && space.piece.color == 'white'
+    end
+  end
+
+  def moves_right_of_file(board, file, rank, moveset)
+    ((file + 1)..('h'.ord)).each do |f|
+      location = [f.chr, rank].join
+      space = board.squares.select { |square| square.location == location }.pop
+      break if !space.piece.nil? && space.piece.color == 'black'
+
+      moveset << location
+      break if !space.piece.nil? && space.piece.color == 'white'
+    end
+  end
+
+  def moves_left_of_file(board, file, rank, moveset)
+    (('a'.ord)..(file - 1)).reverse_each do |f|
+      location = [f.chr, rank].join
+      space = board.squares.select { |square| square.location == location }.pop
+      break if !space.piece.nil? && space.piece.color == 'black'
+
+      moveset << location
+      break if !space.piece.nil? && space.piece.color == 'white'
+    end
   end
 end
 
