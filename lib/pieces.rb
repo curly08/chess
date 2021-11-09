@@ -690,6 +690,28 @@ class WhiteKing < WhitePiece
     super
     @symbol = "\u2654".encode('utf-8')
   end
+
+  def legal_moves(board)
+    file = location.split(//)[0].ord
+    rank = location.split(//)[1].to_i
+    moveset = []
+    [
+      [file.chr, rank + 1].join,
+      [(file + 1).chr, rank + 1].join,
+      [(file + 1).chr, rank].join,
+      [(file + 1).chr, rank - 1].join,
+      [file.chr, rank - 1].join,
+      [(file - 1).chr, rank - 1].join,
+      [(file - 1).chr, rank].join,
+      [(file - 1).chr, rank + 1].join
+    ].each do |move|
+      space = board.squares.select { |square| square.location == move }.pop
+      next if space.nil?
+
+      moveset << move if space.piece.nil? || space.piece.color == 'black'
+    end
+    moveset
+  end
 end
 
 # Black King class
