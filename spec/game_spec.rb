@@ -458,7 +458,7 @@ describe WhiteQueen do
     end
   end
 
-  context 'when queen is on d4 and surrounding by enemy pieces' do
+  context 'when queen is on d4 and surrounding by friendly pieces' do
     before do
       board.populate_square(WhitePawn.new('d5'), 'd5')
       board.populate_square(WhitePawn.new('e5'), 'e5')
@@ -472,6 +472,51 @@ describe WhiteQueen do
 
     it 'has no moves' do
       expect(queen.legal_moves(board)).to eq([])
+    end
+  end
+end
+
+describe WhiteKing do
+  subject(:king) { described_class.new('d4') }
+  let(:board) { Board.new }
+
+  context 'when king is on d4 on empty board' do
+    it 'moves available in all directions' do
+      expect(king.legal_moves(board)).to include('d5', 'e5', 'e4', 'e3', 'd3', 'c3', 'c4', 'c5')
+    end
+  end
+
+  context 'when king is on d4 and surrounded by enemy pieces' do
+    before do
+      board.populate_square(BlackPawn.new('d5'), 'd5')
+      board.populate_square(BlackPawn.new('e5'), 'e5')
+      board.populate_square(BlackPawn.new('e4'), 'e4')
+      board.populate_square(BlackPawn.new('e3'), 'e3')
+      board.populate_square(BlackPawn.new('d3'), 'd3')
+      board.populate_square(BlackPawn.new('c3'), 'c3')
+      board.populate_square(BlackPawn.new('c4'), 'c4')
+      board.populate_square(BlackPawn.new('c5'), 'c5')
+    end
+
+    it 'includes capture squares' do
+      expect(king.legal_moves(board)).to include('d5', 'e5', 'e4', 'e3', 'd3', 'c3', 'c4', 'c5')
+    end
+  end
+
+  context 'when king is on d4 and surrounding by friendly pieces' do
+    before do
+      board.populate_square(WhitePawn.new('d5'), 'd5')
+      board.populate_square(WhitePawn.new('e5'), 'e5')
+      board.populate_square(WhitePawn.new('e4'), 'e4')
+      board.populate_square(WhitePawn.new('e3'), 'e3')
+      board.populate_square(WhitePawn.new('d3'), 'd3')
+      board.populate_square(WhitePawn.new('c3'), 'c3')
+      board.populate_square(WhitePawn.new('c4'), 'c4')
+      board.populate_square(WhitePawn.new('c5'), 'c5')
+    end
+
+    it 'has no moves' do
+      expect(king.legal_moves(board)).to eq([])
     end
   end
 end
