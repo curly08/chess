@@ -430,3 +430,48 @@ describe WhiteBishop do
     end
   end
 end
+
+describe WhiteQueen do
+  subject(:queen) { described_class.new('d4') }
+  let(:board) { Board.new }
+
+  context 'when queen is on d4 on empty board' do
+    it 'includes all moves along files, ranks, and diagonals' do
+      expect(queen.legal_moves(board)).to include('d5', 'd6', 'd7', 'd8', 'd3', 'd2', 'd1', 'c4', 'b4', 'a4', 'e4', 'f4', 'g4', 'h4', 'c3', 'b2', 'a1', 'e5', 'f6', 'g7', 'h8', 'c5', 'b6', 'a7', 'e3', 'f2', 'g1')
+    end
+  end
+
+  context 'when queen is on d4 and surrounding by enemy pieces' do
+    before do
+      board.populate_square(BlackPawn.new('d5'), 'd5')
+      board.populate_square(BlackPawn.new('e5'), 'e5')
+      board.populate_square(BlackPawn.new('e4'), 'e4')
+      board.populate_square(BlackPawn.new('e3'), 'e3')
+      board.populate_square(BlackPawn.new('d3'), 'd3')
+      board.populate_square(BlackPawn.new('c3'), 'c3')
+      board.populate_square(BlackPawn.new('c4'), 'c4')
+      board.populate_square(BlackPawn.new('c5'), 'c5')
+    end
+
+    it 'includes capture squares' do
+      expect(queen.legal_moves(board)).to include('d5', 'e5', 'e4', 'e3', 'd3', 'c3', 'c4', 'c5')
+    end
+  end
+
+  context 'when queen is on d4 and surrounding by enemy pieces' do
+    before do
+      board.populate_square(WhitePawn.new('d5'), 'd5')
+      board.populate_square(WhitePawn.new('e5'), 'e5')
+      board.populate_square(WhitePawn.new('e4'), 'e4')
+      board.populate_square(WhitePawn.new('e3'), 'e3')
+      board.populate_square(WhitePawn.new('d3'), 'd3')
+      board.populate_square(WhitePawn.new('c3'), 'c3')
+      board.populate_square(WhitePawn.new('c4'), 'c4')
+      board.populate_square(WhitePawn.new('c5'), 'c5')
+    end
+
+    it 'has no moves' do
+      expect(queen.legal_moves(board)).to eq([])
+    end
+  end
+end
