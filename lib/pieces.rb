@@ -363,6 +363,73 @@ class BlackBishop < BlackPiece
     super
     @symbol = "\u265D".encode('utf-8')
   end
+
+  def legal_moves(board)
+    file = location.split(//)[0].ord
+    rank = location.split(//)[1].to_i
+    moveset = []
+    moves_up_and_right(board, file, rank, moveset)
+    moves_up_and_left(board, file, rank, moveset)
+    moves_down_and_right(board, file, rank, moveset)
+    moves_down_and_left(board, file, rank, moveset)
+    moveset
+  end
+
+  def moves_up_and_right(board, file, rank, moveset)
+    while (file - 97) < 8 || rank < 8
+      file += 1
+      rank += 1
+      location = [file.chr, rank].join
+      space = board.squares.select { |square| square.location == location }.pop
+      break if space.nil?
+      break if !space.piece.nil? && space.piece.color == 'black'
+
+      moveset << location
+      break if !space.piece.nil? && space.piece.color == 'white'
+    end
+  end
+
+  def moves_up_and_left(board, file, rank, moveset)
+    while (file - 97).positive? || rank < 8
+      file -= 1
+      rank += 1
+      location = [file.chr, rank].join
+      space = board.squares.select { |square| square.location == location }.pop
+      break if space.nil?
+      break if !space.piece.nil? && space.piece.color == 'black'
+
+      moveset << location
+      break if !space.piece.nil? && space.piece.color == 'white'
+    end
+  end
+
+  def moves_down_and_right(board, file, rank, moveset)
+    while (file - 97) < 8 || rank.positive?
+      file += 1
+      rank -= 1
+      location = [file.chr, rank].join
+      space = board.squares.select { |square| square.location == location }.pop
+      break if space.nil?
+      break if !space.piece.nil? && space.piece.color == 'black'
+
+      moveset << location
+      break if !space.piece.nil? && space.piece.color == 'white'
+    end
+  end
+
+  def moves_down_and_left(board, file, rank, moveset)
+    while (file - 97).positive? || rank.positive?
+      file -= 1
+      rank -= 1
+      location = [file.chr, rank].join
+      space = board.squares.select { |square| square.location == location }.pop
+      break if space.nil?
+      break if !space.piece.nil? && space.piece.color == 'black'
+
+      moveset << location
+      break if !space.piece.nil? && space.piece.color == 'white'
+    end
+  end
 end
 
 # White Queen class
