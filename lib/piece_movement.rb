@@ -2,16 +2,16 @@
 
 # Horizontal and Vertical Movement module
 module HorizontalVerticalMovement
-  def add_horizontal_and_vertical_moves(board)
+  def add_horizontal_and_vertical_moves(moves, board)
     file = location.split(//)[0].ord
     rank = location.split(//)[1].to_i
-    moves_below_rank(board, file, rank)
-    moves_above_rank(board, file, rank)
-    moves_right_of_file(board, file, rank)
-    moves_left_of_file(board, file, rank)
+    moves_below_rank(moves, board, file, rank)
+    moves_above_rank(moves, board, file, rank)
+    moves_right_of_file(moves, board, file, rank)
+    moves_left_of_file(moves, board, file, rank)
   end
 
-  def moves_above_rank(board, file, rank)
+  def moves_above_rank(moves, board, file, rank)
     ((rank + 1)..8).each do |r|
       location = [file.chr, r].join
       space = board.squares.select { |square| square.location == location }.pop
@@ -22,7 +22,7 @@ module HorizontalVerticalMovement
     end
   end
 
-  def moves_below_rank(board, file, rank)
+  def moves_below_rank(moves, board, file, rank)
     (1..(rank - 1)).reverse_each do |r|
       location = [file.chr, r].join
       space = board.squares.select { |square| square.location == location }.pop
@@ -33,7 +33,7 @@ module HorizontalVerticalMovement
     end
   end
 
-  def moves_right_of_file(board, file, rank)
+  def moves_right_of_file(moves, board, file, rank)
     ((file + 1)..('h'.ord)).each do |f|
       location = [f.chr, rank].join
       space = board.squares.select { |square| square.location == location }.pop
@@ -44,7 +44,7 @@ module HorizontalVerticalMovement
     end
   end
 
-  def moves_left_of_file(board, file, rank)
+  def moves_left_of_file(moves, board, file, rank)
     (('a'.ord)..(file - 1)).reverse_each do |f|
       location = [f.chr, rank].join
       space = board.squares.select { |square| square.location == location }.pop
@@ -58,16 +58,16 @@ end
 
 # Diagonal movement
 module DiagonalMovement
-  def add_diagonal_moves(board)
+  def add_diagonal_moves(moves, board)
     file = location.split(//)[0].ord
     rank = location.split(//)[1].to_i
-    moves_up_and_right(board, file, rank)
-    moves_up_and_left(board, file, rank)
-    moves_down_and_right(board, file, rank)
-    moves_down_and_left(board, file, rank)
+    moves_up_and_right(moves, board, file, rank)
+    moves_up_and_left(moves, board, file, rank)
+    moves_down_and_right(moves, board, file, rank)
+    moves_down_and_left(moves, board, file, rank)
   end
 
-  def moves_up_and_right(board, file, rank)
+  def moves_up_and_right(moves, board, file, rank)
     while (file - 97) < 8 || rank < 8
       file += 1
       rank += 1
@@ -81,7 +81,7 @@ module DiagonalMovement
     end
   end
 
-  def moves_up_and_left(board, file, rank)
+  def moves_up_and_left(moves, board, file, rank)
     while (file - 97).positive? || rank < 8
       file -= 1
       rank += 1
@@ -95,7 +95,7 @@ module DiagonalMovement
     end
   end
 
-  def moves_down_and_right(board, file, rank)
+  def moves_down_and_right(moves, board, file, rank)
     while (file - 97) < 8 || rank.positive?
       file += 1
       rank -= 1
@@ -109,7 +109,7 @@ module DiagonalMovement
     end
   end
 
-  def moves_down_and_left(board, file, rank)
+  def moves_down_and_left(moves, board, file, rank)
     while (file - 97).positive? || rank.positive?
       file -= 1
       rank -= 1
@@ -126,7 +126,7 @@ end
 
 # Knight movement
 module KnightMovement
-  def add_knight_moves(board)
+  def add_knight_moves(moves, board)
     file = location.split(//)[0].ord
     rank = location.split(//)[1].to_i
     [
@@ -150,42 +150,47 @@ end
 # Pawn movement
 module PawnMovement
   def generate_moves(board)
-    @moves = []
+    moves = []
     file = location.split(//)[0].ord
     rank = location.split(//)[1].to_i
-    color == 'white' ? white_pawn_movement(board, file, rank) : black_pawn_movement(board, file, rank)
+    color == 'white' ? white_pawn_movement(moves, board, file, rank) : black_pawn_movement(moves, board, file, rank)
+    moves
   end
 
-  def white_pawn_movement(board, file, rank)
+  def white_pawn_movement(moves, board, file, rank)
     up_one = [file.chr, rank + 1].join
+    up_one_square = board.squares.select { |square| square.location == up_one }.pop
     up_two = [file.chr, rank + 2].join
+    up_two_square = board.squares.select { |square| square.location == up_two }.pop
     capture_left = [(file - 1).chr, rank + 1].join
     capture_left_square = board.squares.select { |square| square.location == capture_left }.pop
     capture_right = [(file + 1).chr, rank + 1].join
     capture_right_square = board.squares.select { |square| square.location == capture_right }.pop
-    moves << up_one if board.squares.select { |square| square.location == up_one }.pop.piece.nil?
-    moves << up_two if start_locations.include?(location)
-    moves << capture_left if !capture_left_square.piece.nil? && capture_left_square.piece.color != color
-    moves << capture_right if !capture_right_square.piece.nil? && capture_right_square.piece.color != color
+    moves << up_one if up_one_square.piece.nil?
+    moves << up_two if start_locations.include?(location) && up_one_square.piece.nil? && up_two_square.piece.nil?
+    moves << capture_left if !capture_left_square.nil? && !capture_left_square.piece.nil? && capture_left_square.piece.color != color
+    moves << capture_right if !capture_right_square.nil? && !capture_right_square.piece.nil? && capture_right_square.piece.color != color
   end
 
-  def black_pawn_movement(board, file, rank)
+  def black_pawn_movement(moves, board, file, rank)
     down_one = [file.chr, rank - 1].join
+    down_one_square = board.squares.select { |square| square.location == down_one }.pop
     down_two = [file.chr, rank - 2].join
+    down_two_square = board.squares.select { |square| square.location == down_two }.pop
     capture_left = [(file - 1).chr, rank - 1].join
     capture_left_square = board.squares.select { |square| square.location == capture_left }.pop
     capture_right = [(file + 1).chr, rank - 1].join
     capture_right_square = board.squares.select { |square| square.location == capture_right }.pop
-    moves << down_one if board.squares.select { |square| square.location == down_one }.pop.piece.nil?
-    moves << down_two if start_locations.include?(location)
-    moves << capture_left if !capture_left_square.piece.nil? && capture_left_square.piece.color != color
-    moves << capture_right if !capture_right_square.piece.nil? && capture_right_square.piece.color != color
+    moves << down_one if down_one_square.piece.nil?
+    moves << down_two if start_locations.include?(location) && down_one_square.piece.nil? && down_two_square.piece.nil?
+    moves << capture_left if !capture_left_square.nil? && !capture_left_square.piece.nil? && capture_left_square.piece.color != color
+    moves << capture_right if !capture_right_square.nil? && !capture_right_square.piece.nil? && capture_right_square.piece.color != color
   end
 end
 
 # King Movement
 module KingMovement
-  def add_king_moves(board)
+  def add_king_moves(moves, board)
     file = location.split(//)[0].ord
     rank = location.split(//)[1].to_i
     [
