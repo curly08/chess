@@ -4,7 +4,7 @@ require_relative '../lib/piece_movement'
 
 # Piece superclass
 class Piece
-  attr_accessor :location, :moves
+  attr_accessor :location
   attr_reader :color, :symbol, :start_locations
 
   def initialize(location, color)
@@ -15,6 +15,44 @@ class Piece
 
   class << self
     attr_reader :white_start_locations, :black_start_locations
+  end
+
+  def legal_moves(board, player)
+    filter_for_possible_check(board, player)
+  end
+
+  def filter_for_possible_check(board, player)
+    generate_moves(board).reject do |move|
+      new_board = copy_board(board)
+      dummy_piece = new_board.pieces.select { |piece| piece.location == location }.pop
+      new_board.clear_square(location)
+      new_board.populate_square(dummy_piece, move)
+      move if in_check?(new_board, player)
+    end
+  end
+
+  def copy_board(board)
+    new_board = Marshal.load(Marshal.dump(board))
+    new_board.pieces = copy_pieces(board)
+    new_board.squares = new_board.make_squares
+    new_board.pieces.each do |piece|
+      new_board.populate_square(piece, piece.location)
+    end
+    new_board
+  end
+
+  def copy_pieces(board)
+    new_pieces = []
+    board.pieces.each do |piece|
+      new_piece = Marshal.load(Marshal.dump(piece))
+      new_pieces << new_piece
+    end
+    new_pieces
+  end
+
+  def in_check?(board, player)
+    king = board.pieces.select { |piece| piece.is_a?(King) && piece.color == player.color }.pop
+    board.pieces.any? { |piece| piece.color != color && piece.generate_moves(board).include?(king.location) }
   end
 end
 
@@ -42,8 +80,9 @@ class Rook < Piece
   end
 
   def generate_moves(board)
-    @moves = []
-    add_horizontal_and_vertical_moves(board)
+    moves = []
+    add_horizontal_and_vertical_moves(moves, board)
+    moves
   end
 end
 
@@ -59,8 +98,9 @@ class Knight < Piece
   end
 
   def generate_moves(board)
-    @moves = []
-    add_knight_moves(board)
+    moves = []
+    add_knight_moves(moves, board)
+    moves
   end
 end
 
@@ -76,8 +116,9 @@ class Bishop < Piece
   end
 
   def generate_moves(board)
-    @moves = []
-    add_diagonal_moves(board)
+    moves = []
+    add_diagonal_moves(moves, board)
+    moves
   end
 end
 
@@ -94,9 +135,10 @@ class Queen < Piece
   end
 
   def generate_moves(board)
-    @moves = []
-    add_horizontal_and_vertical_moves(board)
-    add_diagonal_moves(board)
+    moves = []
+    add_horizontal_and_vertical_moves(moves, board)
+    add_diagonal_moves(moves, board)
+    moves
   end
 end
 
@@ -112,7 +154,8 @@ class King < Piece
   end
 
   def generate_moves(board)
-    @moves = []
-    add_king_moves(board)
+    moves = []
+    add_king_moves(moves, board)
+    moves
   end
 end
