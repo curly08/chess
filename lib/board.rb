@@ -4,7 +4,8 @@ require_relative '../lib/square'
 
 # board display
 class Board
-  attr_reader :row_separator, :rank_row, :ranks, :files, :squares
+  attr_accessor :pieces, :squares
+  attr_reader :row_separator, :rank_row, :ranks, :files
 
   def initialize
     @row_separator = '  +---+---+---+---+---+---+---+---+'
@@ -12,6 +13,7 @@ class Board
     @ranks = %w[a b c d e f g h]
     @files = %w[8 7 6 5 4 3 2 1]
     @squares = make_squares
+    @pieces = []
   end
 
   def make_squares
