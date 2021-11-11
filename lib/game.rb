@@ -23,13 +23,14 @@ class Game
     randomize_colors
     players.each { |player| generate_pieces(player) }
     show_board_and_title
-    # loop do
-    #   play_move(players[0])
-    #   show_board_and_title
-    #   # return game_over_message if game_over == true
+    loop do
+      puts "#{players[0].color} in check" if in_check?(players[0])
+      play_move(players[0], players[1])
+      show_board_and_title
+      # return game_over_message if game_over == true
 
-    #   players.rotate!
-    # end
+      players.rotate!
+    end
   end
 
   def establish_players
@@ -52,7 +53,7 @@ class Game
       start_locations.each do |location|
         new_piece = piece_class.new(location, player.color)
         board.populate_square(new_piece, location)
-        player.pieces << new_piece
+        board.pieces << new_piece
       end
     end
   end
@@ -64,10 +65,41 @@ class Game
   end
 
   def play_move(player)
-    selected_piece = player.select_piece
-    selected_piece.moves(board)
-    selected_move = player.select_move(selected_piece)
-    board.clear_square(selected_piece.location)
-    board.populate_square(selected_piece, selected_move)
+    selected_piece = select_piece(player)
+    selected_move = select_move(player, selected_piece)
+    move_piece(selected_piece, selected_move)
+  end
+
+  def select_piece(player)
+    playable_pieces = board.pieces.select { |piece| piece.color == player.color && !piece.legal_moves(board, player).empty? }
+    puts "#{player.name}, select a piece to move. Ex. \"#{playable_pieces.sample.location}\""
+    loop do
+      input = gets.chomp
+      selected_piece = playable_pieces.select { |piece| piece.location == input }.pop
+      return selected_piece if playable_pieces.include?(selected_piece)
+
+      puts "#{input} is not a valid selection."
+    end
+  end
+
+  def select_move(player, piece)
+    puts "Where would you like to move #{piece.location}? Ex. \"#{piece.legal_moves(board, player).sample}\""
+    loop do
+      input = gets.chomp
+      return input if piece.legal_moves(board, player).include?(input)
+
+      puts "#{input} is not a valid move."
+    end
+  end
+
+  def move_piece(piece, location)
+    board.pieces.delete_if { |p| p.location == location }
+    board.clear_square(piece.location)
+    board.populate_square(piece, location)
+  end
+
+  def in_check?(player)
+    king = board.pieces.select { |piece| piece.is_a?(King) && piece.color == player.color }.pop
+    board.pieces.any? { |piece| piece.color != player.color && piece.generate_moves(board).include?(king.location) }
   end
 end
