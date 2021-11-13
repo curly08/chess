@@ -25,7 +25,7 @@ class Game
     show_board_and_title
     loop do
       puts "#{players[0].color} in check" if in_check?(players[0])
-      play_move(players[0], players[1])
+      play_move(players[0])
       show_board_and_title
       # return game_over_message if game_over == true
 
@@ -67,6 +67,8 @@ class Game
   def play_move(player)
     selected_piece = select_piece(player)
     selected_move = select_move(player, selected_piece)
+    return castle(selected_piece, selected_move) if selected_piece.is_a?(King) && selected_piece.first_move == true && selected_piece.castle_moves.include?(selected_move)
+
     move_piece(selected_piece, selected_move)
   end
 
@@ -92,14 +94,31 @@ class Game
     end
   end
 
+  def castle(king, location)
+    king_current_file = king.location.split(//)[0].ord
+    file = location.split(//)[0].ord
+    rank = location.split(//)[1].to_i
+    kingside_rook = board.pieces.select do |piece|
+      piece.is_a?(Rook) && piece.color == king.color && piece.location.include?('h')
+    end.pop
+    queenside_rook = board.pieces.select do |piece|
+      piece.is_a?(Rook) && piece.color == king.color && piece.location.include?('a')
+    end.pop
+    rook = king_current_file < file ? kingside_rook : queenside_rook
+    rook_location = king_current_file < file ? [(file - 1).chr, rank].join : [(file + 1).chr, rank].join
+    move_piece(king, location)
+    move_piece(rook, rook_location)
+  end
+
   def move_piece(piece, location)
     board.pieces.delete_if { |p| p.location == location }
     board.clear_square(piece.location)
     board.populate_square(piece, location)
+    piece.first_move = false unless piece.first_move == false
   end
 
   def in_check?(player)
     king = board.pieces.select { |piece| piece.is_a?(King) && piece.color == player.color }.pop
-    board.pieces.any? { |piece| piece.color != player.color && piece.generate_moves(board).include?(king.location) }
+    board.pieces.any? { |piece| piece.color != player.color && piece.add_moves(board).include?(king.location) }
   end
 end
