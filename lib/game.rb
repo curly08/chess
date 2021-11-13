@@ -67,7 +67,12 @@ class Game
   def play_move(player)
     selected_piece = select_piece(player)
     selected_move = select_move(player, selected_piece)
-    return castle(selected_piece, selected_move) if selected_piece.is_a?(King) && selected_piece.first_move == true && selected_piece.castle_moves.include?(selected_move)
+    if selected_piece.is_a?(Pawn) && ((selected_move.include?('8') if selected_piece.color == 'white') || (selected_move.include?('1') if selected_piece.color == 'black'))
+      return promotion(selected_piece, selected_move)
+    end
+    if selected_piece.is_a?(King) && selected_piece.first_move == true && selected_piece.castle_moves.include?(selected_move)
+      return castle(selected_piece, selected_move)
+    end
 
     move_piece(selected_piece, selected_move)
   end
@@ -108,6 +113,26 @@ class Game
     rook_location = king_current_file < file ? [(file - 1).chr, rank].join : [(file + 1).chr, rank].join
     move_piece(king, location)
     move_piece(rook, rook_location)
+  end
+
+  def promotion(pawn, square)
+    legal_promotions = %w[queen rook bishop knight]
+    # ask what class to promote to
+    puts 'What do you want to promote your pawn to? Ex. "queen"'
+    input = nil
+    loop do
+      input = gets.chomp
+      break if legal_promotions.include?(input)
+
+      puts "#{input} is not a valid input."
+    end
+    # add new piece to board
+    new_piece = Object.const_get(input.capitalize).new(square, pawn.color)
+    board.pieces << new_piece
+    board.populate_square(new_piece, square)
+    # delete pawn from board.pieces
+    board.clear_square(pawn.location)
+    board.pieces.delete_if { |piece| piece == pawn }
   end
 
   def move_piece(piece, location)
