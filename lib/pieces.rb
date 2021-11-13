@@ -4,13 +4,14 @@ require_relative '../lib/piece_movement'
 
 # Piece superclass
 class Piece
-  attr_accessor :location
+  attr_accessor :location, :first_move
   attr_reader :color, :symbol, :start_locations
 
   def initialize(location, color)
     @location = location
     @color = color
     @start_locations = color == 'white' ? self.class.white_start_locations : self.class.black_start_locations
+    @first_move = true
   end
 
   class << self
@@ -18,11 +19,12 @@ class Piece
   end
 
   def legal_moves(board, player)
-    filter_for_possible_check(board, player)
+    moves = add_moves(board)
+    filter_for_check(moves, board, player)
   end
 
-  def filter_for_possible_check(board, player)
-    generate_moves(board).reject do |move|
+  def filter_for_check(moves, board, player)
+    moves.reject do |move|
       new_board = copy_board(board)
       dummy_piece = new_board.pieces.select { |piece| piece.location == location }.pop
       new_board.clear_square(location)
@@ -52,7 +54,7 @@ class Piece
 
   def in_check?(board, player)
     king = board.pieces.select { |piece| piece.is_a?(King) && piece.color == player.color }.pop
-    board.pieces.any? { |piece| piece.color != color && piece.generate_moves(board).include?(king.location) }
+    board.pieces.any? { |piece| piece.color != color && piece.add_moves(board).include?(king.location) }
   end
 end
 
@@ -65,6 +67,10 @@ class Pawn < Piece
   def initialize(location, color)
     super
     @symbol = color == 'white' ? "\u2659".encode('utf-8') : "\u265F".encode('utf-8')
+  end
+
+  def add_moves(board)
+    pawn_moves(board)
   end
 end
 
@@ -79,10 +85,8 @@ class Rook < Piece
     @symbol = color == 'white' ? "\u2656".encode('utf-8') : "\u265C".encode('utf-8')
   end
 
-  def generate_moves(board)
-    moves = []
-    add_horizontal_and_vertical_moves(moves, board)
-    moves
+  def add_moves(board)
+    horizontal_vertical_moves(board)
   end
 end
 
@@ -97,10 +101,8 @@ class Knight < Piece
     @symbol = color == 'white' ? "\u2658".encode('utf-8') : "\u265E".encode('utf-8')
   end
 
-  def generate_moves(board)
-    moves = []
-    add_knight_moves(moves, board)
-    moves
+  def add_moves(board)
+    knight_moves(board)
   end
 end
 
@@ -115,10 +117,8 @@ class Bishop < Piece
     @symbol = color == 'white' ? "\u2657".encode('utf-8') : "\u265D".encode('utf-8')
   end
 
-  def generate_moves(board)
-    moves = []
-    add_diagonal_moves(moves, board)
-    moves
+  def add_moves(board)
+    diagonal_moves(board)
   end
 end
 
@@ -134,11 +134,14 @@ class Queen < Piece
     @symbol = color == 'white' ? "\u2655".encode('utf-8') : "\u265B".encode('utf-8')
   end
 
-  def generate_moves(board)
-    moves = []
-    add_horizontal_and_vertical_moves(moves, board)
-    add_diagonal_moves(moves, board)
+  def legal_moves(board, player)
+    moves = add_moves(board)
+    filter_for_check(moves, board, player)
     moves
+  end
+
+  def add_moves(board)
+    horizontal_vertical_moves(board) + diagonal_moves(board)
   end
 end
 
@@ -153,9 +156,7 @@ class King < Piece
     @symbol = color == 'white' ? "\u2654".encode('utf-8') : "\u265A".encode('utf-8')
   end
 
-  def generate_moves(board)
-    moves = []
-    add_king_moves(moves, board)
-    moves
+  def add_moves(board)
+    king_moves(board)
   end
 end
