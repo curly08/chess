@@ -42,41 +42,79 @@ describe Game do
   end
 
   describe '#generate_pieces' do
-    let(:player_one) { instance_double(Player, name: 'Matt', color: 'white', pieces: []) }
-    let(:player_two) { instance_double(Player, name: 'Gary', color: 'black', pieces: []) }
+    let(:player_one) { instance_double(Player, name: 'Matt', color: 'white') }
+    let(:player_two) { instance_double(Player, name: 'Gary', color: 'black') }
 
     before do
       game.instance_variable_set(:@players, [player_one, player_two])
     end
 
     it 'generates 8 pawns for both players' do
-      expect { game.generate_pieces(player_one) }.to change { player_one.pieces.select { |piece| piece.is_a? Pawn }.size }.from(0).to(8)
-      expect { game.generate_pieces(player_two) }.to change { player_two.pieces.select { |piece| piece.is_a? Pawn }.size }.from(0).to(8)
+      expect { game.generate_pieces(player_one) }.to change { game.board.pieces.select { |piece| piece.is_a?(Pawn) && piece.color == 'white' }.size }.from(0).to(8)
+      expect { game.generate_pieces(player_two) }.to change { game.board.pieces.select { |piece| piece.is_a?(Pawn) && piece.color == 'black' }.size }.from(0).to(8)
     end
 
     it 'generates 2 rooks for both players' do
-      expect { game.generate_pieces(player_one) }.to change { player_one.pieces.select { |piece| piece.is_a? Rook }.size }.from(0).to(2)
-      expect { game.generate_pieces(player_two) }.to change { player_two.pieces.select { |piece| piece.is_a? Rook }.size }.from(0).to(2)
+      expect { game.generate_pieces(player_one) }.to change { game.board.pieces.select { |piece| piece.is_a?(Rook) && piece.color == 'white' }.size }.from(0).to(2)
+      expect { game.generate_pieces(player_two) }.to change { game.board.pieces.select { |piece| piece.is_a?(Rook) && piece.color == 'black' }.size }.from(0).to(2)
     end
 
     it 'generates 2 knights for both players' do
-      expect { game.generate_pieces(player_one) }.to change { player_one.pieces.select { |piece| piece.is_a? Knight }.size }.from(0).to(2)
-      expect { game.generate_pieces(player_two) }.to change { player_two.pieces.select { |piece| piece.is_a? Knight }.size }.from(0).to(2)
+      expect { game.generate_pieces(player_one) }.to change { game.board.pieces.select { |piece| piece.is_a?(Bishop) && piece.color == 'white' }.size }.from(0).to(2)
+      expect { game.generate_pieces(player_two) }.to change { game.board.pieces.select { |piece| piece.is_a?(Bishop) && piece.color == 'black' }.size }.from(0).to(2)
     end
 
     it 'generates 2 bishops for both players' do
-      expect { game.generate_pieces(player_one) }.to change { player_one.pieces.select { |piece| piece.is_a? Bishop }.size }.from(0).to(2)
-      expect { game.generate_pieces(player_two) }.to change { player_two.pieces.select { |piece| piece.is_a? Bishop }.size }.from(0).to(2)
+      expect { game.generate_pieces(player_one) }.to change { game.board.pieces.select { |piece| piece.is_a?(Knight) && piece.color == 'white' }.size }.from(0).to(2)
+      expect { game.generate_pieces(player_two) }.to change { game.board.pieces.select { |piece| piece.is_a?(Knight) && piece.color == 'black' }.size }.from(0).to(2)
     end
 
     it 'generates 1 queen for both players' do
-      expect { game.generate_pieces(player_one) }.to change { player_one.pieces.select { |piece| piece.is_a? Queen }.size }.from(0).to(1)
-      expect { game.generate_pieces(player_two) }.to change { player_two.pieces.select { |piece| piece.is_a? Queen }.size }.from(0).to(1)
+      expect { game.generate_pieces(player_one) }.to change { game.board.pieces.select { |piece| piece.is_a?(Queen) && piece.color == 'white' }.size }.from(0).to(1)
+      expect { game.generate_pieces(player_two) }.to change { game.board.pieces.select { |piece| piece.is_a?(Queen) && piece.color == 'black' }.size }.from(0).to(1)
     end
 
     it 'generates 1 king for both players' do
-      expect { game.generate_pieces(player_one) }.to change { player_one.pieces.select { |piece| piece.is_a? King }.size }.from(0).to(1)
-      expect { game.generate_pieces(player_two) }.to change { player_two.pieces.select { |piece| piece.is_a? King }.size }.from(0).to(1)
+      expect { game.generate_pieces(player_one) }.to change { game.board.pieces.select { |piece| piece.is_a?(King) && piece.color == 'white' }.size }.from(0).to(1)
+      expect { game.generate_pieces(player_two) }.to change { game.board.pieces.select { |piece| piece.is_a?(King) && piece.color == 'black' }.size }.from(0).to(1)
+    end
+  end
+
+  describe '#promotion' do
+    context 'white is promoting' do
+      let(:pawn) { Pawn.new('d7', 'white') }
+      let(:player) { instance_double(Player, name: 'Matt', color: 'white') }
+
+      before do
+        game.board.populate_square(pawn, 'd7')
+        allow(game).to receive(:select_piece).and_return(pawn)
+        allow(game).to receive(:select_move).and_return('d8')
+        allow(game).to receive(:gets).and_return('queen')
+      end
+
+      it 'it promotes pawn to queen' do
+        game.play_move(player)
+        square = game.board.squares.select { |square| square.location == 'd8' }.pop
+        expect(square.piece).to be_a(Queen)
+      end
+    end
+
+    context 'black is promoting' do
+      let(:pawn) { Pawn.new('d2', 'black') }
+      let(:player) { instance_double(Player, name: 'Matt', color: 'black') }
+
+      before do
+        game.board.populate_square(pawn, 'd2')
+        allow(game).to receive(:select_piece).and_return(pawn)
+        allow(game).to receive(:select_move).and_return('d1')
+        allow(game).to receive(:gets).and_return('knight')
+      end
+
+      it 'it promotes pawn to knight' do
+        game.play_move(player)
+        square = game.board.squares.select { |square| square.location == 'd1' }.pop
+        expect(square.piece).to be_a(Knight)
+      end
     end
   end
 end
@@ -89,8 +127,7 @@ describe Pawn do
     describe '#legal_moves' do
       context 'when pawn location is on start location e2 and no captures are available' do
         it 'creates [e3, e4]' do
-          pawn.generate_moves(board)
-          expect(pawn.moves).to eq(['e3', 'e4'])
+          expect(pawn.add_moves(board)).to eq(['e3', 'e4'])
         end
       end
 
@@ -101,8 +138,7 @@ describe Pawn do
         end
         
         it 'creates [e3, e4, d3, f3]' do
-          pawn.generate_moves(board)
-          expect(pawn.moves).to eq(['e3', 'e4', 'd3', 'f3'])
+          expect(pawn.add_moves(board)).to eq(['e3', 'e4', 'd3', 'f3'])
         end
       end
 
@@ -110,8 +146,7 @@ describe Pawn do
         subject(:pawn) { described_class.new('e3', 'white') }
 
         it 'creates [e4]' do
-          pawn.generate_moves(board)
-          expect(pawn.moves).to eq(['e4'])
+          expect(pawn.add_moves(board)).to eq(['e4'])
         end
       end
 
@@ -123,8 +158,7 @@ describe Pawn do
         end
 
         it 'creates []' do
-          pawn.generate_moves(board)
-          expect(pawn.moves).to eq([])
+          expect(pawn.add_moves(board)).to eq([])
         end
       end
     end
@@ -137,8 +171,7 @@ describe Pawn do
     describe '#legal_moves' do
       context 'when pawn location is on start location e7 and no captures are available' do
         it 'creates [e6, e5]' do
-          pawn.generate_moves(board)
-          expect(pawn.moves).to eq(['e6', 'e5'])
+          expect(pawn.add_moves(board)).to eq(['e6', 'e5'])
         end
       end
 
@@ -149,8 +182,7 @@ describe Pawn do
         end
         
         it 'creates [e6, e5, d6, f6]' do
-          pawn.generate_moves(board)
-          expect(pawn.moves).to eq(%w[e6 e5 d6 f6])
+          expect(pawn.add_moves(board)).to eq(%w[e6 e5 d6 f6])
         end
       end
 
@@ -158,8 +190,7 @@ describe Pawn do
         subject(:pawn) { described_class.new('e6', 'black') }
 
         it 'creates [e5]' do
-          pawn.generate_moves(board)
-          expect(pawn.moves).to eq(['e5'])
+          expect(pawn.add_moves(board)).to eq(['e5'])
         end
       end
 
@@ -171,8 +202,7 @@ describe Pawn do
         end
 
         it 'creates []' do
-          pawn.generate_moves(board)
-          expect(pawn.moves).to eq([])
+          expect(pawn.add_moves(board)).to eq([])
         end
       end
     end
@@ -190,8 +220,7 @@ describe Rook do
       end
 
       it 'creates [a2 a3 a4 a5 a6 a7 a8]' do
-        rook.generate_moves(board)
-        expect(rook.moves).to eq(%w[a2 a3 a4 a5 a6 a7 a8])
+        expect(rook.add_moves(board)).to eq(%w[a2 a3 a4 a5 a6 a7 a8])
       end
     end
 
@@ -201,8 +230,7 @@ describe Rook do
       end
 
       it 'creates [b1 c1 d1 e1 f1 g1 h1]' do
-        rook.generate_moves(board)
-        expect(rook.moves).to eq(%w[b1 c1 d1 e1 f1 g1 h1])
+        expect(rook.add_moves(board)).to eq(%w[b1 c1 d1 e1 f1 g1 h1])
       end
     end
 
@@ -210,8 +238,7 @@ describe Rook do
       subject(:rook) { described_class.new('a4', 'white') }
 
       it 'includes [a1 a2 a3 a5 a6 a7 a8]' do
-        rook.generate_moves(board)
-        expect(rook.moves).to include('a1', 'a2', 'a3', 'a5', 'a6', 'a7', 'a8')
+        expect(rook.add_moves(board)).to include('a1', 'a2', 'a3', 'a5', 'a6', 'a7', 'a8')
       end
     end
 
@@ -219,8 +246,7 @@ describe Rook do
       subject(:rook) { described_class.new('d1', 'white') }
 
       it 'includes [a1 b1 c1 e1 f1 g1 h1]' do
-        rook.generate_moves(board)
-        expect(rook.moves).to include('a1', 'b1', 'c1', 'e1', 'f1', 'g1', 'h1')
+        expect(rook.add_moves(board)).to include('a1', 'b1', 'c1', 'e1', 'f1', 'g1', 'h1')
       end
     end
 
@@ -235,8 +261,7 @@ describe Rook do
       end
 
       it 'includes [c5 c6 d4 e4 c3 c2 b4 a4]' do
-        rook.generate_moves(board)
-        expect(rook.moves).to include('c5', 'c6', 'd4', 'e4', 'c3', 'c2', 'b4', 'a4')
+        expect(rook.add_moves(board)).to include('c5', 'c6', 'd4', 'e4', 'c3', 'c2', 'b4', 'a4')
       end
     end
   end
@@ -251,8 +276,7 @@ describe Rook do
       end
   
       it 'includes [a1 a2 a3 a4 a5 a6 a7]' do
-        rook.generate_moves(board)
-        expect(rook.moves).to include('a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7')
+        expect(rook.add_moves(board)).to include('a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7')
       end
     end
   
@@ -262,8 +286,7 @@ describe Rook do
       end
   
       it 'creates [b8 c8 d8 e8 f8 g8 h8]' do
-        rook.generate_moves(board)
-        expect(rook.moves).to include('b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8')
+        expect(rook.add_moves(board)).to include('b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8')
       end
     end
   
@@ -275,8 +298,7 @@ describe Rook do
       end
   
       it 'includes [a1 a2 a3 a5 a6 a7 a8]' do
-        rook.generate_moves(board)
-        expect(rook.moves).to include('a1', 'a2', 'a3', 'a5', 'a6', 'a7', 'a8')
+        expect(rook.add_moves(board)).to include('a1', 'a2', 'a3', 'a5', 'a6', 'a7', 'a8')
       end
     end
   
@@ -288,8 +310,7 @@ describe Rook do
       end
   
       it 'includes [a8 b8 c8 e8 f8 g8 h8]' do
-        rook.generate_moves(board)
-        expect(rook.moves).to include('a8', 'b8', 'c8', 'e8', 'f8', 'g8', 'h8')
+        expect(rook.add_moves(board)).to include('a8', 'b8', 'c8', 'e8', 'f8', 'g8', 'h8')
       end
     end
   
@@ -304,8 +325,7 @@ describe Rook do
       end
   
       it 'includes [c5 c6 d4 e4 c3 c2 b4 a4]' do
-        rook.generate_moves(board)
-        expect(rook.moves).to include('c5', 'c6', 'd4', 'e4', 'c3', 'c2', 'b4', 'a4')
+        expect(rook.add_moves(board)).to include('c5', 'c6', 'd4', 'e4', 'c3', 'c2', 'b4', 'a4')
       end
     end  
   end
@@ -318,8 +338,7 @@ describe Knight do
 
     context 'when knight is on c3 and all moves are available' do
       it 'includes [a2 b1 a4 b5 d1 e2 d5 e4]' do
-        knight.generate_moves(board)
-        expect(knight.moves).to include('a2', 'b1', 'a4', 'b5', 'd1', 'e2', 'd5', 'e4')
+        expect(knight.add_moves(board)).to include('a2', 'b1', 'a4', 'b5', 'd1', 'e2', 'd5', 'e4')
       end
     end
 
@@ -330,8 +349,7 @@ describe Knight do
       end
 
       it 'includes [b1 a4 b5 d1 e2 e4]' do
-        knight.generate_moves(board)
-        expect(knight.moves).to include('b1', 'a4', 'b5', 'd1', 'e2', 'e4')
+        expect(knight.add_moves(board)).to include('b1', 'a4', 'b5', 'd1', 'e2', 'e4')
       end
     end
 
@@ -342,8 +360,7 @@ describe Knight do
       end
 
       it 'includes [a2 b1 a4 b5 d1 e2 d5 e4]' do
-        knight.generate_moves(board)
-        expect(knight.moves).to include('a2', 'b1', 'a4', 'b5', 'd1', 'e2', 'd5', 'e4')
+        expect(knight.add_moves(board)).to include('a2', 'b1', 'a4', 'b5', 'd1', 'e2', 'd5', 'e4')
       end
     end
 
@@ -356,8 +373,7 @@ describe Knight do
       end
 
       it 'has no moves' do
-        knight.generate_moves(board)
-        expect(knight.moves).to eq([])
+        expect(knight.add_moves(board)).to eq([])
       end
     end
   end
@@ -368,8 +384,7 @@ describe Knight do
   
     context 'when knight is on c3 and all moves are available' do
       it 'includes [a2 b1 a4 b5 d1 e2 d5 e4]' do
-        knight.generate_moves(board)
-        expect(knight.moves).to include('a2', 'b1', 'a4', 'b5', 'd1', 'e2', 'd5', 'e4')
+        expect(knight.add_moves(board)).to include('a2', 'b1', 'a4', 'b5', 'd1', 'e2', 'd5', 'e4')
       end
     end
   
@@ -380,8 +395,7 @@ describe Knight do
       end
   
       it 'includes [b1 a4 b5 d1 e2 e4]' do
-        knight.generate_moves(board)
-        expect(knight.moves).to include('b1', 'a4', 'b5', 'd1', 'e2', 'e4')
+        expect(knight.add_moves(board)).to include('b1', 'a4', 'b5', 'd1', 'e2', 'e4')
       end
     end
   
@@ -392,8 +406,7 @@ describe Knight do
       end
   
       it 'includes [a2 b1 a4 b5 d1 e2 d5 e4]' do
-        knight.generate_moves(board)
-        expect(knight.moves).to include('a2', 'b1', 'a4', 'b5', 'd1', 'e2', 'd5', 'e4')
+        expect(knight.add_moves(board)).to include('a2', 'b1', 'a4', 'b5', 'd1', 'e2', 'd5', 'e4')
       end
     end
   
@@ -406,8 +419,7 @@ describe Knight do
       end
   
       it 'has no moves' do
-        knight.generate_moves(board)
-        expect(knight.moves).to eq([])
+        expect(knight.add_moves(board)).to eq([])
       end
     end  
   end
@@ -420,8 +432,7 @@ describe Bishop do
 
     context 'when bishop is on a1 and the diagonal is open' do
       it 'includes [b2 c3 d4 e5 f6 g7 h8]' do
-        bishop.generate_moves(board)
-        expect(bishop.moves).to eq(%w[b2 c3 d4 e5 f6 g7 h8])
+        expect(bishop.add_moves(board)).to eq(%w[b2 c3 d4 e5 f6 g7 h8])
       end
     end
 
@@ -429,8 +440,7 @@ describe Bishop do
       subject(:bishop) { described_class.new('h1', 'white') }
 
       it 'includes [g2 f3 e4 d5 c6 b7 a8]' do
-        bishop.generate_moves(board)
-        expect(bishop.moves).to eq(%w[g2 f3 e4 d5 c6 b7 a8])
+        expect(bishop.add_moves(board)).to eq(%w[g2 f3 e4 d5 c6 b7 a8])
       end
     end
 
@@ -438,8 +448,7 @@ describe Bishop do
       subject(:bishop) { described_class.new('a8', 'white') }
 
       it 'includes [b7 c6 d5 e4 f3 g2 h1]' do
-        bishop.generate_moves(board)
-        expect(bishop.moves).to eq(%w[b7 c6 d5 e4 f3 g2 h1])
+        expect(bishop.add_moves(board)).to eq(%w[b7 c6 d5 e4 f3 g2 h1])
       end
     end
 
@@ -447,8 +456,7 @@ describe Bishop do
       subject(:bishop) { described_class.new('h8', 'white') }
 
       it 'includes [g7 f6 e5 d4 c3 b2 a1]' do
-        bishop.generate_moves(board)
-        expect(bishop.moves).to eq(%w[g7 f6 e5 d4 c3 b2 a1])
+        expect(bishop.add_moves(board)).to eq(%w[g7 f6 e5 d4 c3 b2 a1])
       end
     end
 
@@ -463,8 +471,7 @@ describe Bishop do
       end
 
       it 'includes [e6 f7 e4 c6 b7 a8 c4]' do
-        bishop.generate_moves(board)
-        expect(bishop.moves).to include('e6', 'f7', 'e4', 'c6', 'b7', 'a8', 'c4')
+        expect(bishop.add_moves(board)).to include('e6', 'f7', 'e4', 'c6', 'b7', 'a8', 'c4')
       end
     end
   end
@@ -477,8 +484,7 @@ describe Queen do
 
     context 'when queen is on d4 on empty board' do
       it 'includes all moves along files, ranks, and diagonals' do
-        queen.generate_moves(board)
-        expect(queen.moves).to include('d5', 'd6', 'd7', 'd8', 'd3', 'd2', 'd1', 'c4', 'b4', 'a4', 'e4', 'f4', 'g4', 'h4', 'c3', 'b2', 'a1', 'e5', 'f6', 'g7', 'h8', 'c5', 'b6', 'a7', 'e3', 'f2', 'g1')
+        expect(queen.add_moves(board)).to include('d5', 'd6', 'd7', 'd8', 'd3', 'd2', 'd1', 'c4', 'b4', 'a4', 'e4', 'f4', 'g4', 'h4', 'c3', 'b2', 'a1', 'e5', 'f6', 'g7', 'h8', 'c5', 'b6', 'a7', 'e3', 'f2', 'g1')
       end
     end
 
@@ -495,8 +501,7 @@ describe Queen do
       end
 
       it 'includes capture squares' do
-        queen.generate_moves(board)
-        expect(queen.moves).to include('d5', 'e5', 'e4', 'e3', 'd3', 'c3', 'c4', 'c5')
+        expect(queen.add_moves(board)).to include('d5', 'e5', 'e4', 'e3', 'd3', 'c3', 'c4', 'c5')
       end
     end
 
@@ -513,8 +518,7 @@ describe Queen do
       end
 
       it 'has no moves' do
-        queen.generate_moves(board)
-        expect(queen.moves).to eq([])
+        expect(queen.add_moves(board)).to eq([])
       end
     end
   end
@@ -527,8 +531,7 @@ describe King do
 
     context 'when king is on d4 on empty board' do
       it 'moves available in all directions' do
-        king.generate_moves(board)
-        expect(king.moves).to include('d5', 'e5', 'e4', 'e3', 'd3', 'c3', 'c4', 'c5')
+        expect(king.add_moves(board)).to include('d5', 'e5', 'e4', 'e3', 'd3', 'c3', 'c4', 'c5')
       end
     end
 
@@ -545,8 +548,7 @@ describe King do
       end
 
       it 'includes capture squares' do
-        king.generate_moves(board)
-        expect(king.moves).to include('d5', 'e5', 'e4', 'e3', 'd3', 'c3', 'c4', 'c5')
+        expect(king.add_moves(board)).to include('d5', 'e5', 'e4', 'e3', 'd3', 'c3', 'c4', 'c5')
       end
     end
 
@@ -563,8 +565,7 @@ describe King do
       end
 
       it 'has no moves' do
-        king.generate_moves(board)
-        expect(king.moves).to eq([])
+        expect(king.add_moves(board)).to eq([])
       end
     end
   end
