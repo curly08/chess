@@ -65,8 +65,11 @@ class Game
   end
 
   def play_move(player)
+    reset_en_passant_risk(player)
     selected_piece = select_piece(player)
     selected_move = select_move(player, selected_piece)
+    en_passant_risk?(selected_piece, selected_move) if selected_piece.is_a?(Pawn)
+    en_passant_capture(selected_piece, selected_move) if selected_piece.is_a?(Pawn)
     if selected_piece.is_a?(Pawn) && ((selected_move.include?('8') if selected_piece.color == 'white') || (selected_move.include?('1') if selected_piece.color == 'black'))
       return promotion(selected_piece, selected_move)
     end
@@ -75,6 +78,30 @@ class Game
     end
 
     move_piece(selected_piece, selected_move)
+  end
+
+  def reset_en_passant_risk(player)
+    pawns = board.pieces.select { |piece| piece.color == player.color && piece.is_a?(Pawn) }
+    pawns.each { |pawn| pawn.en_passant_risk = false if pawn.en_passant_risk == true }
+  end
+
+  def en_passant_risk?(pawn, move)
+    current_rank = pawn.location.split(//)[1].to_i
+    new_rank = move.split(//)[1].to_i
+    difference = current_rank < new_rank ? new_rank - current_rank : current_rank - new_rank
+    pawn.en_passant_risk = true if difference == 2
+  end
+
+  def en_passant_capture(pawn, move)
+    current_file = pawn.location.split(//)[0].ord
+    current_rank = pawn.location.split(//)[1].to_i
+    new_file = move.split(//)[0].ord
+    new_square = board.squares.select { |square| square.location == move }.pop
+    captured_location = [new_file.chr, current_rank].join
+    return unless current_file != new_file && new_square.piece.nil?
+
+    board.pieces.delete_if { |p| p.location == captured_location }
+    board.clear_square(captured_location)
   end
 
   def select_piece(player)
