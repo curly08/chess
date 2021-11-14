@@ -61,12 +61,15 @@ end
 # Pawn class
 class Pawn < Piece
   include PawnMovement
+  attr_accessor :en_passant_risk
+
   @white_start_locations = %w[a2 b2 c2 d2 e2 f2 g2 h2]
   @black_start_locations = %w[a7 b7 c7 d7 e7 f7 g7 h7]
 
   def initialize(location, color)
     super
     @symbol = color == 'white' ? "\u2659".encode('utf-8') : "\u265F".encode('utf-8')
+    @en_passant_risk = false
   end
 
   def add_moves(board)
