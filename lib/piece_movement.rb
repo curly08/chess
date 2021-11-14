@@ -174,6 +174,7 @@ module PawnMovement
     moves << up_two if start_locations.include?(location) && up_one_square.piece.nil? && up_two_square.piece.nil?
     moves << capture_left if !capture_left_square.nil? && !capture_left_square.piece.nil? && capture_left_square.piece.color != color
     moves << capture_right if !capture_right_square.nil? && !capture_right_square.piece.nil? && capture_right_square.piece.color != color
+    en_passant_captures(capture_right, capture_left, moves, board, file, rank)
   end
 
   def black_pawn_movement(moves, board, file, rank)
@@ -189,6 +190,14 @@ module PawnMovement
     moves << down_two if start_locations.include?(location) && down_one_square.piece.nil? && down_two_square.piece.nil?
     moves << capture_left if !capture_left_square.nil? && !capture_left_square.piece.nil? && capture_left_square.piece.color != color
     moves << capture_right if !capture_right_square.nil? && !capture_right_square.piece.nil? && capture_right_square.piece.color != color
+    en_passant_captures(capture_right, capture_left, moves, board, file, rank)
+  end
+
+  def en_passant_captures(capture_right, capture_left, moves, board, file, rank)
+    right_square = board.squares.select { |square| square.location == [(file + 1).chr, rank].join }.pop unless file.chr == 'h'
+    left_square = board.squares.select { |square| square.location == [(file - 1).chr, rank].join }.pop unless file.chr == 'a'
+    moves << capture_right if !right_square.nil? && right_square.piece.is_a?(Pawn) && right_square.piece.color != color && right_square.piece.en_passant_risk == true
+    moves << capture_left if !left_square.nil? && left_square.piece.is_a?(Pawn) && left_square.piece.color != color && left_square.piece.en_passant_risk == true
   end
 end
 
