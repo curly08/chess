@@ -117,6 +117,156 @@ describe Game do
       end
     end
   end
+
+  describe '#checkmate?' do
+    context 'when black is mated' do
+      let(:white_queen) { Queen.new('e7', 'white') }
+      let(:white_king) { King.new('e1', 'white') }
+      let(:white_rook) { Rook.new('e6', 'white') }
+      let(:black_king) { King.new('e8', 'black') }
+      let(:player_one) { instance_double(Player, name: 'Matt', color: 'white') }
+      let(:player_two) { instance_double(Player, name: 'Gary', color: 'black') }
+
+      before do
+        game.instance_variable_set(:@player_one, player_one)
+        game.instance_variable_set(:@player_two, player_two)
+        game.instance_variable_set(:@players, [player_one, player_two])
+        game.board.instance_variable_set(:@pieces, [white_queen, white_king, white_rook, black_king])
+        game.board.populate_square(white_queen, 'e7')
+        game.board.populate_square(white_king, 'e1')
+        game.board.populate_square(white_rook, 'e6')
+        game.board.populate_square(black_king, 'e8')
+        game.show_board_and_title
+      end
+
+      it 'returns true' do
+        expect(game.checkmate?).to eq(true)
+      end
+    end
+
+    context 'when black is not mated' do
+      let(:white_queen) { Queen.new('f7', 'white') }
+      let(:white_king) { King.new('e1', 'white') }
+      let(:white_rook) { Rook.new('e6', 'white') }
+      let(:black_king) { King.new('e8', 'black') }
+      let(:player_one) { instance_double(Player, name: 'Matt', color: 'white') }
+      let(:player_two) { instance_double(Player, name: 'Gary', color: 'black') }
+
+      before do
+        game.instance_variable_set(:@player_one, player_one)
+        game.instance_variable_set(:@player_two, player_two)
+        game.instance_variable_set(:@players, [player_one, player_two])
+        game.board.instance_variable_set(:@pieces, [white_queen, white_king, white_rook, black_king])
+        game.board.populate_square(white_queen, 'f7')
+        game.board.populate_square(white_king, 'e1')
+        game.board.populate_square(white_rook, 'e6')
+        game.board.populate_square(black_king, 'e8')
+        game.show_board_and_title
+      end
+
+      it 'returns false' do
+        expect(game.checkmate?).to eq(false)
+      end
+    end
+  end
+
+  describe '#stalemate?' do
+    context 'when stalemate occurs' do
+      let(:white_rook_one) { Rook.new('d7', 'white') }
+      let(:white_king) { King.new('e1', 'white') }
+      let(:white_rook_two) { Rook.new('f7', 'white') }
+      let(:black_king) { King.new('e8', 'black') }
+      let(:player_one) { instance_double(Player, name: 'Matt', color: 'white') }
+      let(:player_two) { instance_double(Player, name: 'Gary', color: 'black') }
+
+      before do
+        game.instance_variable_set(:@player_one, player_one)
+        game.instance_variable_set(:@player_two, player_two)
+        game.instance_variable_set(:@players, [player_one, player_two])
+        game.board.instance_variable_set(:@pieces, [white_rook_one, white_king, white_rook_two, black_king])
+        game.board.populate_square(white_rook_one, 'd7')
+        game.board.populate_square(white_king, 'e1')
+        game.board.populate_square(white_rook_two, 'f7')
+        game.board.populate_square(black_king, 'e8')
+        game.show_board_and_title
+      end
+
+      it 'returns true' do
+        expect(game.stalemate?).to eq(true)
+      end
+    end
+
+    context 'when stalemate does not occur' do
+      let(:white_rook_one) { Rook.new('d7', 'white') }
+      let(:white_king) { King.new('e1', 'white') }
+      let(:pawn) { Pawn.new('f7', 'white') }
+      let(:black_king) { King.new('e8', 'black') }
+      let(:player_one) { instance_double(Player, name: 'Matt', color: 'white') }
+      let(:player_two) { instance_double(Player, name: 'Gary', color: 'black') }
+
+      before do
+        game.instance_variable_set(:@player_one, player_one)
+        game.instance_variable_set(:@player_two, player_two)
+        game.instance_variable_set(:@players, [player_one, player_two])
+        game.board.instance_variable_set(:@pieces, [white_rook_one, white_king, pawn, black_king])
+        game.board.populate_square(white_rook_one, 'd7')
+        game.board.populate_square(white_king, 'e1')
+        game.board.populate_square(pawn, 'f7')
+        game.board.populate_square(black_king, 'e8')
+        game.show_board_and_title
+      end
+
+      it 'returns false' do
+        expect(game.stalemate?).to eq(false)
+      end
+    end
+  end
+
+  describe '#dead_position?' do
+    context 'when dead position does not occur' do
+      let(:white_rook_one) { Rook.new('d7', 'white') }
+      let(:white_king) { King.new('e1', 'white') }
+      let(:black_king) { King.new('e8', 'black') }
+      let(:player_one) { instance_double(Player, name: 'Matt', color: 'white') }
+      let(:player_two) { instance_double(Player, name: 'Gary', color: 'black') }
+
+      before do
+        game.instance_variable_set(:@player_one, player_one)
+        game.instance_variable_set(:@player_two, player_two)
+        game.instance_variable_set(:@players, [player_one, player_two])
+        game.board.instance_variable_set(:@pieces, [white_rook_one, white_king, black_king])
+        game.board.populate_square(white_rook_one, 'd7')
+        game.board.populate_square(white_king, 'e1')
+        game.board.populate_square(black_king, 'e8')
+        game.show_board_and_title
+      end
+
+      it 'returns false' do
+        expect(game.dead_position?).to eq(false)
+      end
+    end
+
+    context 'when dead position occurs' do
+      let(:white_king) { King.new('e1', 'white') }
+      let(:black_king) { King.new('e8', 'black') }
+      let(:player_one) { instance_double(Player, name: 'Matt', color: 'white') }
+      let(:player_two) { instance_double(Player, name: 'Gary', color: 'black') }
+
+      before do
+        game.instance_variable_set(:@player_one, player_one)
+        game.instance_variable_set(:@player_two, player_two)
+        game.instance_variable_set(:@players, [player_one, player_two])
+        game.board.instance_variable_set(:@pieces, [white_king, black_king])
+        game.board.populate_square(white_king, 'e1')
+        game.board.populate_square(black_king, 'e8')
+        game.show_board_and_title
+      end
+
+      it 'returns true' do
+        expect(game.dead_position?).to eq(true)
+      end
+    end
+  end
 end
 
 describe Pawn do
