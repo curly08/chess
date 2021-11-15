@@ -10,3 +10,14 @@ class Player
     @color = nil
   end
 end
+
+# computer player
+class ComputerPlayer
+  attr_accessor :color
+  attr_reader :name
+
+  def initialize
+    @name = 'COMPUTER'
+    @color = nil
+  end
+end
