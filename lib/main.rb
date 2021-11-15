@@ -2,5 +2,4 @@
 
 require_relative '../lib/game'
 
-game = Game.new
-game.play_game
+Game.load_game?
