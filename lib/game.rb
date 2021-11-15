@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'yaml'
 require_relative '../lib/player'
 require_relative '../lib/board'
 require_relative '../lib/pieces'
@@ -7,22 +8,34 @@ require_relative '../lib/square'
 
 # core game logic
 class Game
-  attr_accessor :players, :board
-  attr_reader :piece_classes, :player_one, :player_two
+  attr_accessor :players, :board, :current_player, :player_one, :player_two
+  attr_reader :piece_classes
 
-  def initialize
-    @players = []
-    @board = Board.new
+  def initialize(data = {})
+    @players = data.fetch(:players, [])
+    @board = data.fetch(:board, Board.new)
     @piece_classes = [Pawn, Rook, Knight, Bishop, Queen, King]
+    @player_one = data.fetch(:player_one, nil)
+    @player_two = data.fetch(:player_two, nil)
+    @current_player = data.fetch(:current_player, nil)
   end
 
-  def play_game
+  def play
+    set_up_game
+    play_game
+  end
+
+  def set_up_game
     establish_players
     randomize_colors
     players.each { |player| generate_pieces(player) }
+  end
+
+  def play_game
     show_board_and_title
     loop do
-      play_move(players[0])
+      current_player = players[0]
+      play_move(current_player)
       show_board_and_title
       break if game_over?
 
@@ -130,8 +143,8 @@ class Game
     loop do
       input = gets.chomp
       return resign(player) if input == 'resign'
-      # return save if input == 'save' will putting this functionality here make it difficult to load correctly?
 
+      save_and_exit_game if input == 'save'
       selected_piece = playable_pieces.select { |piece| piece.location == input }.pop
       return selected_piece if playable_pieces.include?(selected_piece)
 
@@ -147,6 +160,7 @@ class Game
       input = gets.chomp
       return resign(player) if input == 'resign'
 
+      save_and_exit_game if input == 'save'
       return input if piece.legal_moves(board, player).include?(input)
 
       puts "#{input} is not a valid move."
@@ -224,6 +238,48 @@ class Game
   def resign(resigning_player)
     opponent = players.reject { |player| player == resigning_player }.pop
     puts "#{resigning_player.name} has resigned. #{opponent.name} wins!"
+    exit #rematch
+  end
+
+  def self.load_game?
+    puts 'Type 1 to play a new game or 2 to load a previous game.'
+    loop do
+      input = gets.chomp
+      return Game.new.play if input == '1'
+      return Game.from_yaml if input == '2'
+
+      puts "#{input} is not a valid input."
+    end
+  end
+
+  def save_and_exit_game
+    Dir.mkdir('saved-games') unless Dir.exist?('saved-games')
+    puts "\nWhat would you like to save your game as?"
+    begin
+      input = gets.chomp
+      raise 'Invalid filename!' unless input.match?(/^[A-Za-z0-9._ -]+$/i)
+
+      filename = "saved-games/#{input}.yaml"
+      File.open(filename, 'w') { |file| file.puts to_yaml }
+    rescue StandardError => e
+      puts e.to_s
+      retry
+    end
     exit
+  end
+
+  def to_yaml
+    YAML.dump({ players: @players,
+                board: @board,
+                player_one: @player_one,
+                player_two: @player_two,
+                current_player: @current_player })
+  end
+
+  def self.from_yaml
+    puts 'Which game do you want to load?'
+    input = gets.chomp
+    data = YAML.load(File.read("saved-games/#{input}.yaml"))
+    Game.new(data).play_game
   end
 end
