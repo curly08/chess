@@ -27,6 +27,7 @@ class Piece
     moves.reject do |move|
       new_board = copy_board(board)
       dummy_piece = new_board.pieces.select { |piece| piece.location == location }.pop
+      new_board.pieces.delete_if { |p| p.location == move }
       new_board.clear_square(location)
       new_board.populate_square(dummy_piece, move)
       move if in_check?(new_board, player)
