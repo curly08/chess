@@ -12,17 +12,16 @@ describe Game do
 
   describe '#establish_players' do
     player_one = 'Matt'
-    player_two = 'Gary'
+    let(:player_two) { instance_double(Player, 'Gary') }
 
     before do
-      allow(game).to receive(:puts).twice
-      allow(game).to receive(:gets).and_return(player_one, player_two)
+      allow(game).to receive(:puts)
+      allow(game).to receive(:gets).and_return(player_one)
+      allow(game).to receive(:choose_opponent).and_return(player_two)
     end
 
     it 'creates two instances of Player with user inputted names' do
-      expect(Player).to receive(:new).with(player_one).once
-      expect(Player).to receive(:new).with(player_two).once
-      game.establish_players
+      expect {game.establish_players }.to change {game.players.size }.from(0).to(2)
     end
   end
 
@@ -716,6 +715,50 @@ describe King do
 
       it 'has no moves' do
         expect(king.add_moves(board)).to eq([])
+      end
+    end
+
+    context 'it is in position to safely castle both ways' do
+      subject(:king) { described_class.new('e1', 'white') }
+      let(:player) { instance_double(Player, name: 'Matt', color: 'white') }
+      let(:board) { Board.new }
+      let(:queen) { Queen.new('h5', 'black') }
+      let(:rook) { Rook.new('h1', 'white') }
+      let(:rook_two) { Rook.new('a1', 'white') }
+      let(:pawn) { Pawn.new('g4', 'white') }
+
+      before do
+        board.pieces.push(king, queen, rook, rook_two, pawn)
+        board.populate_square(king, king.location)
+        board.populate_square(queen, queen.location)
+        board.populate_square(rook, rook.location)
+        board.populate_square(rook_two, rook_two.location)
+        board.populate_square(pawn, pawn.location)
+      end
+
+      it 'includes kingside and queenside castle moves' do
+        expect(king.legal_moves(board, player)).to include('g1', 'c1')
+      end
+    end
+
+    context 'queen is blocking castle moves' do
+      subject(:king) { described_class.new('e1', 'white') }
+      let(:player) { instance_double(Player, name: 'Matt', color: 'white') }
+      let(:board) { Board.new }
+      let(:queen) { Queen.new('d3', 'black') }
+      let(:rook) { Rook.new('h1', 'white') }
+      let(:rook_two) { Rook.new('a1', 'white') }
+
+      before do
+        board.pieces.push(king, queen, rook, rook_two)
+        board.populate_square(king, king.location)
+        board.populate_square(queen, queen.location)
+        board.populate_square(rook, rook.location)
+        board.populate_square(rook_two, rook_two.location)
+      end
+
+      it 'excludes castle moves' do
+        expect(king.legal_moves(board, player)).to_not include('g1', 'c1')
       end
     end
   end
