@@ -21,16 +21,17 @@ class Piece
   def legal_moves(board, player)
     moves = add_moves(board)
     filter_for_check(moves, board, player)
+    moves
   end
 
   def filter_for_check(moves, board, player)
-    moves.reject do |move|
+    moves.reject! do |move|
       new_board = copy_board(board)
       dummy_piece = new_board.pieces.select { |piece| piece.location == location }.pop
       new_board.pieces.delete_if { |p| p.location == move }
       new_board.clear_square(location)
       new_board.populate_square(dummy_piece, move)
-      move if in_check?(new_board, player)
+      in_check?(new_board, player)
     end
   end
 
@@ -55,7 +56,7 @@ class Piece
 
   def in_check?(board, player)
     king = board.pieces.select { |piece| piece.is_a?(King) && piece.color == player.color }.pop
-    board.pieces.any? { |piece| piece.color != color && piece.add_moves(board).include?(king.location) }
+    board.pieces.any? { |piece| piece.color != player.color && piece.add_moves(board).include?(king.location) }
   end
 end
 
