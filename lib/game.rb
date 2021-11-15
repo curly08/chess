@@ -171,7 +171,6 @@ class Game
 
   def promotion(pawn, square)
     legal_promotions = %w[queen rook bishop knight]
-    # ask what class to promote to
     puts 'What do you want to promote your pawn to? Ex. "queen"'
     input = nil
     loop do
@@ -180,11 +179,9 @@ class Game
 
       puts "#{input} is not a valid input."
     end
-    # add new piece to board
     new_piece = Object.const_get(input.capitalize).new(square, pawn.color)
     board.pieces << new_piece
     board.populate_square(new_piece, square)
-    # delete pawn from board.pieces
     board.clear_square(pawn.location)
     board.pieces.delete_if { |piece| piece == pawn }
   end
