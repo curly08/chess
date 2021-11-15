@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'pry-byebug'
-
 require_relative '../lib/player'
 require_relative '../lib/board'
 require_relative '../lib/pieces'
@@ -35,9 +33,28 @@ class Game
   def establish_players
     puts 'Player 1, what is your name?'
     @player_one = Player.new(gets.chomp)
+    choose_opponent
+    players.push(player_one, player_two)
+  end
+
+  def choose_opponent
+    puts 'Type 1 to play against another human or 2 to play against the computer.'
+    loop do
+      input = gets.chomp
+      return human_player_two if input == '1'
+      return computer_player_two if input == '2'
+
+      puts "#{input} is not a valid input."
+    end
+  end
+
+  def human_player_two
     puts 'Player 2, what is your name?'
     @player_two = Player.new(gets.chomp)
-    players.push(player_one, player_two)
+  end
+
+  def computer_player_two
+    @player_two = ComputerPlayer.new
   end
 
   def randomize_colors
@@ -65,6 +82,7 @@ class Game
   end
 
   def play_move(player)
+    puts "Enter 'resign' to resign or 'save' to save and exit your game."
     reset_en_passant_risk(player)
     selected_piece = select_piece(player)
     selected_move = select_move(player, selected_piece)
@@ -106,10 +124,13 @@ class Game
 
   def select_piece(player)
     playable_pieces = board.pieces.select { |piece| piece.color == player.color && !piece.legal_moves(board, player).empty? }
+    return playable_pieces.sample if player.is_a?(ComputerPlayer)
+
     puts "#{player.name}, select a piece to move. Ex. \"#{playable_pieces.sample.location}\""
     loop do
       input = gets.chomp
       return resign(player) if input == 'resign'
+      # return save if input == 'save' will putting this functionality here make it difficult to load correctly?
 
       selected_piece = playable_pieces.select { |piece| piece.location == input }.pop
       return selected_piece if playable_pieces.include?(selected_piece)
@@ -119,6 +140,8 @@ class Game
   end
 
   def select_move(player, piece)
+    return piece.legal_moves(board, player).sample if player.is_a?(ComputerPlayer)
+
     puts "Where would you like to move #{piece.location}? Ex. \"#{piece.legal_moves(board, player).sample}\""
     loop do
       input = gets.chomp
