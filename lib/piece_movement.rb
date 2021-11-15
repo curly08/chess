@@ -242,9 +242,9 @@ module KingMovement
     end.pop
     squares_between = [
       board.squares.select { |square| square.location == [(file + 1).chr, rank].join }.pop,
-      board.squares.select { |square| square.location == [(file + 2).chr, rank].join }.pop,
+      board.squares.select { |square| square.location == [(file + 2).chr, rank].join }.pop
     ]
-    return unless squares_between_unoccupied?(squares_between) && king_and_rook_first_move?(kingside_rook) && under_attack?(board, squares_between)
+    return unless squares_between_unoccupied?(squares_between) && king_and_rook_first_move?(kingside_rook) && !under_attack?(board, squares_between)
 
     moves << kingside_castle
   end
@@ -256,9 +256,9 @@ module KingMovement
     end.pop
     squares_between = [
       board.squares.select { |square| square.location == [(file - 1).chr, rank].join }.pop,
-      board.squares.select { |square| square.location == [(file - 2).chr, rank].join }.pop,
+      board.squares.select { |square| square.location == [(file - 2).chr, rank].join }.pop
     ]
-    return unless squares_between_unoccupied?(squares_between) && king_and_rook_first_move?(queenside_rook) && under_attack?(board, squares_between)
+    return unless squares_between_unoccupied?(squares_between) && king_and_rook_first_move?(queenside_rook) && !under_attack?(board, squares_between)
 
     moves << queenside_castle
   end
@@ -272,9 +272,9 @@ module KingMovement
   end
 
   def under_attack?(board, squares_between)
-    squares_between.none? do |square|
+    squares_between.any? do |square|
       board.pieces.any? do |piece|
-        piece.color != color && piece.add_moves(board).include?(square.location)
+        !piece.is_a?(King) && piece.color != color && piece.add_moves(board).include?(square.location)
       end
     end
   end
