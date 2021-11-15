@@ -10,7 +10,7 @@ require_relative '../lib/square'
 # core game logic
 class Game
   attr_accessor :players, :board
-  attr_reader :piece_classes
+  attr_reader :piece_classes, :player_one, :player_two
 
   def initialize
     @players = []
@@ -24,10 +24,9 @@ class Game
     players.each { |player| generate_pieces(player) }
     show_board_and_title
     loop do
-      puts "#{players[0].color} in check" if in_check?(players[0])
       play_move(players[0])
       show_board_and_title
-      # return game_over_message if game_over == true
+      break if game_over?
 
       players.rotate!
     end
@@ -35,9 +34,9 @@ class Game
 
   def establish_players
     puts 'Player 1, what is your name?'
-    player_one = Player.new(gets.chomp)
+    @player_one = Player.new(gets.chomp)
     puts 'Player 2, what is your name?'
-    player_two = Player.new(gets.chomp)
+    @player_two = Player.new(gets.chomp)
     players.push(player_one, player_two)
   end
 
@@ -60,7 +59,8 @@ class Game
 
   def show_board_and_title
     system('clear') || system('cls')
-    puts "#{players[0].name.upcase}(#{players[0].color})    V    #{players[1].name.upcase}(#{players[1].color})\n"
+    puts "#{player_one.name} (#{player_one.color})    V    #{player_two.name} (#{player_two.color})\n"
+    players.each { |player| puts "#{player.color} in check" if in_check?(player) }
     board.make_grid
   end
 
@@ -109,6 +109,8 @@ class Game
     puts "#{player.name}, select a piece to move. Ex. \"#{playable_pieces.sample.location}\""
     loop do
       input = gets.chomp
+      return resign(player) if input == 'resign'
+
       selected_piece = playable_pieces.select { |piece| piece.location == input }.pop
       return selected_piece if playable_pieces.include?(selected_piece)
 
@@ -120,6 +122,8 @@ class Game
     puts "Where would you like to move #{piece.location}? Ex. \"#{piece.legal_moves(board, player).sample}\""
     loop do
       input = gets.chomp
+      return resign(player) if input == 'resign'
+
       return input if piece.legal_moves(board, player).include?(input)
 
       puts "#{input} is not a valid move."
@@ -172,5 +176,34 @@ class Game
   def in_check?(player)
     king = board.pieces.select { |piece| piece.is_a?(King) && piece.color == player.color }.pop
     board.pieces.any? { |piece| piece.color != player.color && piece.add_moves(board).include?(king.location) }
+  end
+
+  def game_over?
+    puts "Checkmate! #{players[0].name} wins!" if checkmate?
+    puts "It's a stalemate!" if stalemate?
+    puts "It's a dead position!" if dead_position?
+    return true if checkmate? || stalemate? || dead_position?
+
+    false
+  end
+
+  def checkmate?
+    in_check?(players[1]) && board.pieces.none? { |piece| piece.color == players[1].color && !piece.legal_moves(board, players[1]).empty? }
+  end
+
+  def stalemate?
+    players.any? do |player|
+      !in_check?(player) && board.pieces.none? { |piece| piece.color == player.color && !piece.legal_moves(board, player).empty? }
+    end
+  end
+
+  def dead_position?
+    board.pieces.all? { |piece| piece.is_a?(King) }
+  end
+
+  def resign(resigning_player)
+    opponent = players.reject { |player| player == resigning_player }.pop
+    puts "#{resigning_player.name} has resigned. #{opponent.name} wins!"
+    exit
   end
 end
