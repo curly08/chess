@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'colorize'
 require_relative '../lib/piece_movement'
 
 # Piece superclass
@@ -70,7 +71,7 @@ class Pawn < Piece
 
   def initialize(location, color)
     super
-    @symbol = color == 'white' ? "\u2659".encode('utf-8') : "\u265F".encode('utf-8')
+    @symbol = color == 'white' ? "\u265F".encode('utf-8').colorize(:white) : "\u265F".encode('utf-8').colorize(:black)
     @en_passant_risk = false
   end
 
@@ -87,7 +88,7 @@ class Rook < Piece
 
   def initialize(location, color)
     super
-    @symbol = color == 'white' ? "\u2656".encode('utf-8') : "\u265C".encode('utf-8')
+    @symbol = color == 'white' ? "\u265C".encode('utf-8').colorize(:white) : "\u265C".encode('utf-8').colorize(:black)
   end
 
   def add_moves(board)
@@ -103,7 +104,7 @@ class Knight < Piece
 
   def initialize(location, color)
     super
-    @symbol = color == 'white' ? "\u2658".encode('utf-8') : "\u265E".encode('utf-8')
+    @symbol = color == 'white' ? "\u265E".encode('utf-8').colorize(:white) : "\u265E".encode('utf-8').colorize(:black)
   end
 
   def add_moves(board)
@@ -119,7 +120,7 @@ class Bishop < Piece
 
   def initialize(location, color)
     super
-    @symbol = color == 'white' ? "\u2657".encode('utf-8') : "\u265D".encode('utf-8')
+    @symbol = color == 'white' ? "\u265D".encode('utf-8').colorize(:white) : "\u265D".encode('utf-8').colorize(:black)
   end
 
   def add_moves(board)
@@ -136,7 +137,7 @@ class Queen < Piece
 
   def initialize(location, color)
     super
-    @symbol = color == 'white' ? "\u2655".encode('utf-8') : "\u265B".encode('utf-8')
+    @symbol = color == 'white' ? "\u265B".encode('utf-8').colorize(:white) : "\u265B".encode('utf-8').colorize(:black)
   end
 
   def legal_moves(board, player)
@@ -158,7 +159,7 @@ class King < Piece
 
   def initialize(location, color)
     super
-    @symbol = color == 'white' ? "\u2654".encode('utf-8') : "\u265A".encode('utf-8')
+    @symbol = color == 'white' ? "\u265A".encode('utf-8').colorize(:white) : "\u265A".encode('utf-8').colorize(:black)
   end
 
   def add_moves(board)
