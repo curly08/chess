@@ -8,8 +8,8 @@ class Board
   attr_reader :row_separator, :rank_row, :ranks, :files
 
   def initialize
-    @row_separator = '  +---+---+---+---+---+---+---+---+'
-    @rank_row = '    a   b   c   d   e   f   g   h'
+    @row_separator = '  ' + '+---+---+---+---+---+---+---+---+'.on_blue
+    @rank_row = '    a   b   c   d   e   f   g   h  '
     @ranks = %w[a b c d e f g h]
     @files = %w[8 7 6 5 4 3 2 1]
     @squares = make_squares
@@ -29,14 +29,14 @@ class Board
   def make_grid
     puts row_separator
     files.each do |file|
-      print "#{file} |"
+      print "#{file} " + "|".on_blue
       ranks.each do |rank|
         selected_square = squares.select { |square| square.location == [rank, file].join }.pop
-        print " #{selected_square.data} |"
+        print " #{selected_square.data} |".on_blue
       end
       puts "\n#{row_separator}"
     end
-    puts rank_row
+    puts "#{rank_row}\n"
   end
 
   def populate_square(piece, piece_location)
