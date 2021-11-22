@@ -41,17 +41,20 @@ class Game
 
       players.rotate!
     end
+    rematch
   end
 
   def establish_players
-    puts 'Player 1, what is your name?'
+    system('clear') || system('cls')
+    puts "Player 1, what is your name?\n"
     @player_one = Player.new(gets.chomp)
     choose_opponent
     players.push(player_one, player_two)
   end
 
   def choose_opponent
-    puts 'Type 1 to play against another human or 2 to play against the computer.'
+    system('clear') || system('cls')
+    puts "Type 1 to play against another human or 2 to play against the computer.\n"
     loop do
       input = gets.chomp
       return human_player_two if input == '1'
@@ -62,6 +65,7 @@ class Game
   end
 
   def human_player_two
+    system('clear') || system('cls')
     puts 'Player 2, what is your name?'
     @player_two = Player.new(gets.chomp)
   end
@@ -89,16 +93,18 @@ class Game
 
   def show_board_and_title
     system('clear') || system('cls')
-    puts "#{player_one.name} (#{player_one.color})    V    #{player_two.name} (#{player_two.color})\n"
-    players.each { |player| puts "#{player.color} in check" if in_check?(player) }
+    puts "#{player_one.name} (#{player_one.color})    V    #{player_two.name} (#{player_two.color})\n\n"
+    players.each { |player| puts "#{player.color} in check\n\n" if in_check?(player) }
     board.make_grid
+    puts "\nEnter \"resign\" to resign or \"save\" to save and exit your game.\n"
   end
 
   def play_move(player)
-    puts "Enter 'resign' to resign or 'save' to save and exit your game."
     reset_en_passant_risk(player)
     selected_piece = select_piece(player)
     selected_move = select_move(player, selected_piece)
+    return play_move(player) if selected_move == 'change'
+
     en_passant_risk?(selected_piece, selected_move) if selected_piece.is_a?(Pawn)
     en_passant_capture(selected_piece, selected_move) if selected_piece.is_a?(Pawn)
     if selected_piece.is_a?(Pawn) && ((selected_move.include?('8') if selected_piece.color == 'white') || (selected_move.include?('1') if selected_piece.color == 'black'))
@@ -139,7 +145,7 @@ class Game
     playable_pieces = board.pieces.select { |piece| piece.color == player.color && !piece.legal_moves(board, player).empty? }
     return playable_pieces.sample if player.is_a?(ComputerPlayer)
 
-    puts "#{player.name}, select a piece to move. Ex. \"#{playable_pieces.sample.location}\""
+    puts "\n#{player.name}, select a piece to move (Ex. \"#{playable_pieces.sample.location}\")\n"
     loop do
       input = gets.chomp
       return resign(player) if input == 'resign'
@@ -155,10 +161,11 @@ class Game
   def select_move(player, piece)
     return piece.legal_moves(board, player).sample if player.is_a?(ComputerPlayer)
 
-    puts "Where would you like to move #{piece.location}? Ex. \"#{piece.legal_moves(board, player).sample}\""
+    puts "\nSelect a square to move #{piece.location} to (Ex. \"#{piece.legal_moves(board, player).sample}\"). Enter \"change\" to select a different piece.\n"
     loop do
       input = gets.chomp
       return resign(player) if input == 'resign'
+      return input if input == 'change'
 
       save_and_exit_game if input == 'save'
       return input if piece.legal_moves(board, player).include?(input)
@@ -213,9 +220,9 @@ class Game
   end
 
   def game_over?
-    puts "Checkmate! #{players[0].name} wins!" if checkmate?
-    puts "It's a stalemate!" if stalemate?
-    puts "It's a dead position!" if dead_position?
+    puts "\nCheckmate! #{players[0].name} wins!" if checkmate?
+    puts "\nIt's a stalemate!" if stalemate?
+    puts "\nIt's a dead position!" if dead_position?
     return true if checkmate? || stalemate? || dead_position?
 
     false
@@ -238,11 +245,19 @@ class Game
   def resign(resigning_player)
     opponent = players.reject { |player| player == resigning_player }.pop
     puts "#{resigning_player.name} has resigned. #{opponent.name} wins!"
-    exit #rematch
+    exit
+  end
+
+  def rematch
+    puts "\nEnter 1 to play again or 2 to close the program."
+    input = gets.chomp
+    load_game? if input == 1
+    exit if input == 2
   end
 
   def self.load_game?
-    puts 'Type 1 to play a new game or 2 to load a previous game.'
+    system('clear') || system('cls')
+    puts "Type 1 to play a new game or 2 to load a previous game.\n"
     loop do
       input = gets.chomp
       return Game.new.play if input == '1'
